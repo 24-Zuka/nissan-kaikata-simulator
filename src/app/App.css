@@ -1,0 +1,775 @@
+/* =========================================================================
+   日産 購入方法比較シミュレーター スタイル
+   基調: 白 / 薄いグレー。アクセント: 日産レッド（主要ボタン・強調のみ）。
+   金額は右揃え・tabular-nums。太い黒枠・強い影は使わない。
+   ========================================================================= */
+
+:root {
+  --red: #c3002f;
+  --red-dark: #9d0026;
+  --ink: #1a1a1a;
+  --ink-2: #4a4a4a;
+  --ink-3: #767676;
+  --line: #e2e2e2;
+  --line-2: #ededf0;
+  --bg: #f5f6f7;
+  --surface: #ffffff;
+  --surface-2: #fafbfc;
+  --best: #fff4f6;
+  --best-line: #f3c2cd;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-family:
+    'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+}
+
+body {
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.amount,
+.cmp__value,
+.mtn__num,
+.quickresult__val,
+.pcard__kfvalue {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* ------------------------------ App shell ------------------------------ */
+.app {
+  min-height: 100vh;
+}
+
+.app__header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 10px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.app__brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.app__logo {
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--red);
+}
+
+.app__appname {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.app__nav {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.app__navbtn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.app__navbtn.is-active {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+  font-weight: 700;
+}
+
+.app__actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.app__btn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.app__btn:hover {
+  background: var(--surface-2);
+}
+
+.app__btn--primary {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+  font-weight: 700;
+}
+
+.app__file {
+  display: none;
+}
+
+.app__notice {
+  margin: 8px 20px 0;
+  padding: 8px 14px;
+  background: #eef7ee;
+  border: 1px solid #cfe6cf;
+  border-radius: 8px;
+  color: #2e6b2e;
+  font-size: 0.9rem;
+}
+
+.app__main {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ------------------------------ Forms ------------------------------ */
+.inputscreen {
+  display: grid;
+  gap: 18px;
+}
+
+.formsec {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px 22px;
+}
+
+.formsec__head {
+  margin-bottom: 14px;
+}
+
+.formsec__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-left: 4px solid var(--red);
+  padding-left: 10px;
+}
+
+.formsec__desc {
+  margin: 6px 0 0;
+  color: var(--ink-3);
+  font-size: 0.85rem;
+}
+
+.formsec__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field--full {
+  grid-column: 1 / -1;
+}
+
+.field__label {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.field__inputwrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field__input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: var(--surface);
+  min-height: 44px;
+}
+
+.field__input:focus {
+  outline: 2px solid var(--red);
+  outline-offset: -1px;
+  border-color: var(--red);
+}
+
+.field__input--num {
+  text-align: right;
+  padding-right: 38px;
+  font-variant-numeric: tabular-nums;
+}
+
+.field__suffix {
+  position: absolute;
+  right: 12px;
+  color: var(--ink-3);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.field__hint {
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.check input {
+  width: 20px;
+  height: 20px;
+}
+
+.omatome__checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 6px;
+}
+
+/* Quick result (input bottom, small) */
+.quickresult {
+  background: var(--surface-2);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+}
+
+.quickresult__title {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: var(--ink-2);
+}
+
+.quickresult__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.92rem;
+}
+
+.quickresult__val {
+  font-weight: 700;
+}
+
+.quickresult__hint {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+
+/* ------------------------------ Comparison table ------------------------------ */
+.presentation {
+  display: grid;
+  gap: 18px;
+}
+
+.presentation__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 2px solid var(--red);
+  padding-bottom: 10px;
+}
+
+.presentation__title {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.presentation__sub {
+  margin: 4px 0 0;
+  color: var(--ink-2);
+}
+
+.presentation__meta {
+  display: flex;
+  gap: 14px;
+  color: var(--ink-3);
+  font-size: 0.85rem;
+}
+
+.presentation__block {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+}
+
+.presentation__cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.presentation__h2 {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.presentation__text {
+  margin: 0 0 8px;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+
+.cmp {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.cmp__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.cmp__corner,
+.cmp__planhead {
+  background: var(--surface-2);
+  border-bottom: 2px solid var(--line);
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.cmp__planhead {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.cmp__corner {
+  text-align: left;
+  color: var(--ink-3);
+}
+
+.cmp__rowhead {
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.cmp__cell {
+  text-align: right;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.cmp__row--strong .cmp__cell,
+.cmp__row--strong .cmp__rowhead {
+  background: var(--surface-2);
+}
+
+.cmp__row--strong .cmp__value {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.cmp__cell--best {
+  background: var(--best) !important;
+  box-shadow: inset 0 0 0 1px var(--best-line);
+}
+
+.cmp__badge {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.68rem;
+  color: var(--red-dark);
+  font-weight: 700;
+}
+
+/* ------------------------------ Maintenance breakdown ------------------------------ */
+.mtn {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.mtn__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+}
+
+.mtn__th {
+  background: var(--surface-2);
+  border-bottom: 2px solid var(--line);
+  padding: 9px 12px;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  text-align: left;
+}
+
+.mtn__th--num {
+  text-align: right;
+}
+
+.mtn__item {
+  text-align: left;
+  padding: 9px 12px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--line);
+}
+
+.mtn__num {
+  text-align: right;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.mtn__cycle {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+
+.mtn__blank {
+  color: var(--ink-3);
+}
+
+.mtn__num--strong {
+  font-weight: 800;
+}
+
+.mtn__total .mtn__totallabel {
+  text-align: right;
+  padding: 11px 12px;
+  font-weight: 700;
+  border-top: 2px solid var(--line);
+}
+
+.mtn__total .mtn__num {
+  border-top: 2px solid var(--line);
+  border-bottom: none;
+}
+
+/* ------------------------------ BVC ------------------------------ */
+.bvc__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bvc__table th,
+.bvc__table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.bvc__table thead th,
+.bvc__table tbody th {
+  text-align: left;
+  color: var(--ink-2);
+}
+
+.bvc__note {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+}
+
+/* ------------------------------ Diff ------------------------------ */
+.diff__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.diff__cell {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.diff__label {
+  font-size: 0.82rem;
+  color: var(--ink-3);
+}
+
+.diff__val {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------ Omatome summary ------------------------------ */
+.omatome__summary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.omatome__summary li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.92rem;
+}
+
+/* ------------------------------ Plan cards (mobile) ------------------------------ */
+.pcards {
+  display: grid;
+  gap: 12px;
+}
+
+.pcard {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.pcard__title {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+}
+
+.pcard__keyfigs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pcard__keyfig {
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pcard__kflabel {
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+
+.pcard__kfvalue {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.pcard__toggle {
+  margin-top: 10px;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.pcard__detail {
+  margin: 12px 0 0;
+  display: grid;
+  gap: 6px;
+}
+
+.pcard__detail > div {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding: 5px 0;
+  font-size: 0.92rem;
+}
+
+.pcard__detail dt {
+  color: var(--ink-3);
+}
+
+.pcard__detail dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* PC では比較表、スマホではカードを表示 */
+.presentation__block--cards {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .presentation__block--table {
+    display: none;
+  }
+  .presentation__block--cards {
+    display: block;
+  }
+  .presentation__cols {
+    grid-template-columns: 1fr;
+  }
+  .app__appname {
+    display: none;
+  }
+}
+
+/* ------------------------------ Print preview (screen) ------------------------------ */
+.printsheet {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin: 0 auto;
+  padding: 10mm 12mm;
+  width: 297mm;
+  max-width: 100%;
+  min-height: 200mm;
+  display: flex;
+  flex-direction: column;
+  gap: 6mm;
+}
+
+.printsheet__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 2px solid var(--red);
+  padding-bottom: 6px;
+}
+
+.printsheet__title {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.printsheet__sub {
+  margin: 2px 0 0;
+  color: var(--ink-2);
+  font-size: 0.95rem;
+}
+
+.printsheet__meta {
+  display: flex;
+  gap: 14px;
+  color: var(--ink-2);
+  font-size: 0.85rem;
+}
+
+.printsheet__h2 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.printsheet__block--bottom {
+  flex: 1 1 auto;
+}
+
+.printsheet .cmp__table,
+.printsheet .mtn__table {
+  min-width: 0;
+}
+
+/* ------------------------------ Print media ------------------------------ */
+@page {
+  size: A4 landscape;
+  margin: 8mm;
+}
+
+@media print {
+  html,
+  body,
+  #root,
+  .app {
+    background: #fff !important;
+  }
+  .app__header,
+  .app__notice {
+    display: none !important;
+  }
+  .app__main {
+    padding: 0;
+    max-width: none;
+  }
+  .printsheet {
+    border: none;
+    border-radius: 0;
+    width: auto;
+    min-height: auto;
+    padding: 0;
+    gap: 5mm;
+  }
+  /* 太い黒枠を避け、薄いグレー線で整理 */
+  .cmp__corner,
+  .cmp__planhead,
+  .mtn__th {
+    border-bottom-color: #cfcfcf;
+  }
+  .cmp__cell,
+  .cmp__rowhead,
+  .mtn__num,
+  .mtn__item,
+  .mtn__cycle {
+    border-bottom-color: #e0e0e0;
+  }
+  .cmp__cell--best {
+    box-shadow: inset 0 0 0 1px #d9a7b2;
+  }
+}

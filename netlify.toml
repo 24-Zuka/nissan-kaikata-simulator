@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA: 直接URLアクセスでも index.html を返す
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
