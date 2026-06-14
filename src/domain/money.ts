@@ -136,6 +136,38 @@ export function ceilYen(value: Decimal): number {
   return value.ceil().toNumber()
 }
 
+/**
+ * unknown を Decimal へ変換する（公開API）。変換不能・非有限・空は 0 として扱う。
+ * 途中計算で Decimal を得たい場合に使う。負数はそのまま保持する（正規化は呼び出し側の責務）。
+ */
+export function toDecimal(value: unknown): Decimal {
+  return toDecimalSafe(value) ?? new Decimal(0)
+}
+
+/** 金額入力として妥当か（有限かつ非負の数として解釈できるか）。空・null・undefined は false。 */
+export function isValidMoneyInput(value: unknown): boolean {
+  const d = toDecimalSafe(value)
+  return d !== null && !d.isNegative()
+}
+
+/**
+ * 安全な金額の除算。分母が0以下・非数の場合は 0 を返し、例外を投げない。
+ * 結果は ROUNDING_CONFIG に倣い既定で切り捨て（非負整数）。
+ */
+export function safeDivideYen(
+  numerator: unknown,
+  denominator: unknown,
+  mode: 'floor' | 'round' | 'ceil' = 'floor',
+): number {
+  const n = toDecimalSafe(numerator)
+  const d = toDecimalSafe(denominator)
+  if (n === null || d === null || d.lte(0)) return 0
+  const q = n.div(d)
+  if (mode === 'round') return roundYen(q)
+  if (mode === 'ceil') return ceilYen(q)
+  return floorYen(q)
+}
+
 /** 金額を日本円表記の文字列にする。例: 1234567 -> "1,234,567円" */
 export function formatYen(value: number): string {
   const n = normalizeYen(value)

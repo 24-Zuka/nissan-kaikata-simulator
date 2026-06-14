@@ -10,7 +10,7 @@ import { calcVehicleEstimate } from './estimate'
 import { calculateMaintenance } from './maintenance'
 import { calculateCashPlan } from './cash'
 import { calculateCreditPlan } from './credit'
-import { calculateBvcPlan } from './bvc'
+import { calculateBvcPlan, calculateBvcBoth } from './bvc'
 import { calculateOmatomePlan } from './omatome'
 import { calculateStatusQuoPlan } from './statusQuo'
 import { normalizeYen } from './money'
@@ -36,6 +36,9 @@ export function calculateScenario(scenario: Scenario): ScenarioResult {
     bvc: calculateBvcPlan(scenario, ctx),
     omatome: calculateOmatomePlan(scenario, ctx),
     comparisonMonths,
+    // 維持費・BVC両建ては結果に内包し、画面/印刷/説明モードは再計算せずこれを参照する。
+    maintenance,
+    bvcBoth: calculateBvcBoth(scenario, ctx),
   }
 }
 

@@ -150,6 +150,42 @@ describe('現状維持', () => {
   })
 })
 
+describe('整合性: 計算結果オブジェクトの単一データ源', () => {
+  it('ScenarioResult が維持費・BVC両建てを内包し、bvcBoth が bvc プランと整合する', () => {
+    const s = makeScenario({
+      ...baseScenario,
+      bvc: {
+        downPayment: 0,
+        annualRate: 3.9,
+        months: 60,
+        residualValue: 1_000_000,
+        bonusPayment: 0,
+        bonusMonths: [],
+        mode: 'return',
+      },
+    })
+    const result = calculateScenario(s)
+    // 維持費は結果に内包され、独立計算と一致する。
+    expect(result.maintenance.total).toBe(ctxOf(s).maintenance.total)
+    // 選択モード(return)の bvc 列と bvcBoth.return が一致する（再計算しても同値）。
+    expect(result.bvc.totalPayment).toBe(result.bvcBoth.return.totalPayment)
+    expect(result.bvcBoth.residualDiff).toBe(1_000_000)
+  })
+
+  it('simulationYears が範囲外でも結果は正規化され（>=1年）、内包維持費に反映される', () => {
+    // 不正な 0 年。calculateScenario は Math.max(1, ...) で1年に正規化する。
+    const s = makeScenario({
+      ...baseScenario,
+      maintenance: { ...baseScenario.maintenance, simulationYears: 0 },
+    })
+    const result = calculateScenario(s)
+    expect(result.comparisonMonths).toBe(12)
+    // 1年に正規化された維持費が結果に内包されている（独立に1年で計算した値と一致）。
+    const oneYear = calculateMaintenance(s.maintenance, { vehicleMode: s.vehicleMode, years: 1 })
+    expect(result.maintenance.total).toBe(oneYear.total)
+  })
+})
+
 describe('整合性: 全プラン非負整数', () => {
   it('全プランの主要金額が非負整数', () => {
     const s = makeScenario({

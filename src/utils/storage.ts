@@ -5,6 +5,7 @@
 
 import { STORAGE_KEYS } from '../domain/constants'
 import type { Scenario } from '../domain/types'
+import { mergeScenarioDefaults } from './share'
 
 function safeGet(key: string): string | null {
   try {
@@ -38,8 +39,9 @@ export function loadScenario(): Scenario | null {
   if (!raw) return null
   try {
     const parsed = JSON.parse(raw)
-    if (parsed && typeof parsed === 'object' && 'id' in parsed) {
-      return parsed as Scenario
+    if (parsed && typeof parsed === 'object') {
+      // 欠損キー（ネスト含む）を既定値で補完し、旧バージョンの保存でも安全に復元する。
+      return mergeScenarioDefaults(parsed)
     }
     return null
   } catch {

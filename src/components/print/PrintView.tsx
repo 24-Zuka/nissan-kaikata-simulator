@@ -8,7 +8,6 @@ import type { Scenario, ScenarioResult } from '../../domain/types'
 import type { StatusQuoVisibility } from '../../domain/visibility'
 import { ComparisonTable } from '../comparison/ComparisonTable'
 import { MaintenanceBreakdown } from '../comparison/MaintenanceBreakdown'
-import { calculateMaintenance } from '../../domain/maintenance'
 import { formatDateJp } from '../../utils/format'
 
 export function PrintView({
@@ -20,10 +19,8 @@ export function PrintView({
   result: ScenarioResult
   visibility: StatusQuoVisibility
 }) {
-  const maintenance = calculateMaintenance(scenario.maintenance, {
-    vehicleMode: scenario.vehicleMode,
-    years: scenario.maintenance.simulationYears,
-  })
+  // 維持費は結果から参照（再計算しない＝お客様説明モード/比較表と同一の値）。
+  const maintenance = result.maintenance
   const showStatusQuo = visibility.showInPrintComparison && result.statusQuo.isVisible
 
   return (
@@ -38,7 +35,7 @@ export function PrintView({
           </p>
         </div>
         <div className="printsheet__meta">
-          <span>比較期間 {scenario.maintenance.simulationYears}年</span>
+          <span>比較期間 {result.comparisonMonths / 12}年</span>
           {scenario.staffName ? <span>担当 {scenario.staffName}</span> : null}
           {scenario.quoteDate ? <span>作成日 {formatDateJp(scenario.quoteDate)}</span> : null}
         </div>

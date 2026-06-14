@@ -10,7 +10,6 @@ import { ComparisonTable } from '../comparison/ComparisonTable'
 import { MaintenanceBreakdown } from '../comparison/MaintenanceBreakdown'
 import { BvcReturnPurchase } from '../comparison/BvcReturnPurchase'
 import { PlanCards } from '../plans/PlanCards'
-import { calculateMaintenance } from '../../domain/maintenance'
 import { formatDateJp, formatYen } from '../../utils/format'
 
 export function PresentationView({
@@ -22,10 +21,8 @@ export function PresentationView({
   result: ScenarioResult
   visibility: StatusQuoVisibility
 }) {
-  const maintenance = calculateMaintenance(scenario.maintenance, {
-    vehicleMode: scenario.vehicleMode,
-    years: scenario.maintenance.simulationYears,
-  })
+  // 維持費・BVC両建ては結果から参照（再計算しない＝比較表と同一の値）。
+  const maintenance = result.maintenance
 
   const showStatusQuo = visibility.showInCustomerPresentation && result.statusQuo.isVisible
   const omatome = result.omatome
@@ -44,7 +41,7 @@ export function PresentationView({
           </p>
         </div>
         <div className="presentation__meta">
-          <span>比較期間: {scenario.maintenance.simulationYears}年</span>
+          <span>比較期間: {result.comparisonMonths / 12}年</span>
           {scenario.quoteDate ? <span>作成日: {formatDateJp(scenario.quoteDate)}</span> : null}
         </div>
       </header>
@@ -92,7 +89,7 @@ export function PresentationView({
 
         <section className="presentation__block">
           <h2 className="presentation__h2">BVC 返却・買取</h2>
-          <BvcReturnPurchase scenario={scenario} />
+          <BvcReturnPurchase both={result.bvcBoth} />
         </section>
       </div>
 

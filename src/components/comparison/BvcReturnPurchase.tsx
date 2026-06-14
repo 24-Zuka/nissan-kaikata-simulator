@@ -3,24 +3,10 @@
  * 残価が最終回に据え置かれること、返却と買取の差が残価相当であることを示す。
  */
 
-import type { Scenario } from '../../domain/types'
-import { calculateBvcBoth, calcVehicleEstimate } from '../../domain/scenario'
-import { calculateMaintenance } from '../../domain/maintenance'
+import type { BvcBothResult } from '../../domain/types'
 import { formatYen } from '../../utils/format'
 
-export function BvcReturnPurchase({ scenario }: { scenario: Scenario }) {
-  const estimate = calcVehicleEstimate(scenario)
-  const years = scenario.maintenance.simulationYears
-  const maintenance = calculateMaintenance(scenario.maintenance, {
-    vehicleMode: scenario.vehicleMode,
-    years,
-  })
-  const both = calculateBvcBoth(scenario, {
-    estimate,
-    maintenance,
-    comparisonMonths: years * 12,
-  })
-
+export function BvcReturnPurchase({ both }: { both: BvcBothResult }) {
   if (both.purchase.residualValue <= 0) {
     return (
       <p className="bvc__note">

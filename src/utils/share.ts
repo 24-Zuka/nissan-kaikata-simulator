@@ -36,6 +36,27 @@ export function stripPersonalInfo(scenario: Scenario): Scenario {
   return { ...scenario, customerName: '', staffName: '' }
 }
 
+/**
+ * 任意の解析済みデータを、欠損キーを既定値で補完して安全な Scenario にする。
+ * ネストしたオブジェクト（currentCar/maintenance/各プラン）も既定値で1段マージし、
+ * 旧バージョン・部分データの読込でクラッシュしないようにする（保存データ移行の安全網）。
+ */
+export function mergeScenarioDefaults(parsed: unknown): Scenario {
+  const base = createDefaultScenario()
+  if (!parsed || typeof parsed !== 'object') return base
+  const p = parsed as Partial<Scenario>
+  return {
+    ...base,
+    ...p,
+    currentCar: { ...base.currentCar, ...(p.currentCar ?? {}) },
+    maintenance: { ...base.maintenance, ...(p.maintenance ?? {}) },
+    cash: { ...base.cash, ...(p.cash ?? {}) },
+    credit: { ...base.credit, ...(p.credit ?? {}) },
+    bvc: { ...base.bvc, ...(p.bvc ?? {}) },
+    omatome: { ...base.omatome, ...(p.omatome ?? {}) },
+  }
+}
+
 /** JSON文字列としてエクスポート（整形済み）。 */
 export function exportScenarioJson(scenario: Scenario): string {
   try {
@@ -50,8 +71,8 @@ export function importScenarioJson(json: string): Scenario | null {
   try {
     const parsed = JSON.parse(json)
     if (!parsed || typeof parsed !== 'object') return null
-    // 欠損フィールドを初期値で補完して安全に取り込む。
-    return { ...createDefaultScenario(), ...parsed } as Scenario
+    // 欠損フィールド（ネスト含む）を初期値で補完して安全に取り込む。
+    return mergeScenarioDefaults(parsed)
   } catch {
     return null
   }

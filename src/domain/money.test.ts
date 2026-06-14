@@ -8,6 +8,9 @@ import {
   ceilYen,
   formatYen,
   formatYenOrBlank,
+  toDecimal,
+  isValidMoneyInput,
+  safeDivideYen,
   Decimal,
 } from './money'
 
@@ -119,5 +122,51 @@ describe('formatYenOrBlank', () => {
   })
   it('値はフォーマット', () => {
     expect(formatYenOrBlank(3000)).toBe('3,000円')
+  })
+})
+
+describe('toDecimal', () => {
+  it('数値・数値文字列・Decimal を Decimal にする', () => {
+    expect(toDecimal(1234).toNumber()).toBe(1234)
+    expect(toDecimal('2000').toNumber()).toBe(2000)
+    expect(toDecimal(new Decimal('3.5')).toNumber()).toBe(3.5)
+  })
+  it('変換不能・非有限・空は 0', () => {
+    expect(toDecimal(NaN).toNumber()).toBe(0)
+    expect(toDecimal(Infinity).toNumber()).toBe(0)
+    expect(toDecimal('abc').toNumber()).toBe(0)
+    expect(toDecimal('').toNumber()).toBe(0)
+    expect(toDecimal(null).toNumber()).toBe(0)
+    expect(toDecimal(undefined).toNumber()).toBe(0)
+  })
+})
+
+describe('isValidMoneyInput', () => {
+  it('有限・非負は true', () => {
+    expect(isValidMoneyInput(0)).toBe(true)
+    expect(isValidMoneyInput('1500')).toBe(true)
+    expect(isValidMoneyInput(new Decimal('12.3'))).toBe(true)
+  })
+  it('負数・非有限・空・非数は false', () => {
+    expect(isValidMoneyInput(-1)).toBe(false)
+    expect(isValidMoneyInput(NaN)).toBe(false)
+    expect(isValidMoneyInput(Infinity)).toBe(false)
+    expect(isValidMoneyInput('')).toBe(false)
+    expect(isValidMoneyInput(null)).toBe(false)
+    expect(isValidMoneyInput('abc')).toBe(false)
+  })
+})
+
+describe('safeDivideYen', () => {
+  it('既定は切り捨ての非負整数', () => {
+    expect(safeDivideYen(1000, 3)).toBe(333)
+    expect(safeDivideYen(1000, 3, 'round')).toBe(333)
+    expect(safeDivideYen(1000, 3, 'ceil')).toBe(334)
+  })
+  it('分母0以下・非数は 0（例外を投げない）', () => {
+    expect(safeDivideYen(1000, 0)).toBe(0)
+    expect(safeDivideYen(1000, -5)).toBe(0)
+    expect(safeDivideYen(1000, NaN)).toBe(0)
+    expect(safeDivideYen(NaN, 3)).toBe(0)
   })
 })

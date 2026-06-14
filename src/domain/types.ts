@@ -6,6 +6,9 @@
  * 「同一オブジェクトを表示するだけ」になるよう、表示に必要な値をすべて保持する。
  */
 
+// MaintenanceResult は計算結果(ScenarioResult)に内包するため型のみ参照する（型専用の循環参照）。
+import type { MaintenanceResult } from './maintenance'
+
 // ---------------------------------------------------------------------------
 // 列挙的な型
 // ---------------------------------------------------------------------------
@@ -198,6 +201,14 @@ export type PlanResult = {
   warnings: string[]
 }
 
+/** BVC 返却/買取の両建て結果（お客様説明モードの比較表示用）。 */
+export type BvcBothResult = {
+  return: PlanResult
+  purchase: PlanResult
+  /** 買取時 − 返却時の支払総額差（残価相当）。 */
+  residualDiff: number
+}
+
 /** 5プラン分の計算結果をまとめたもの。UIはこれを参照するだけ。 */
 export type ScenarioResult = {
   statusQuo: PlanResult
@@ -207,4 +218,8 @@ export type ScenarioResult = {
   omatome: PlanResult
   /** 比較月数（実質月額の割り基準） */
   comparisonMonths: number
+  /** 維持費用内訳（画面・印刷・説明モードが同一オブジェクトを参照するため結果に内包）。 */
+  maintenance: MaintenanceResult
+  /** BVC 返却/買取の両建て（同上。再計算による不一致を防ぐ）。 */
+  bvcBoth: BvcBothResult
 }
