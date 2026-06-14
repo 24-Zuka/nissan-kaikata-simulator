@@ -13,7 +13,7 @@ import type { PlanResult, Scenario } from './types'
 import type { MaintenanceItemKey } from './maintenance'
 import { PLAN_LABELS } from './constants'
 import { createBreakdown, effectiveMonthlyOf, type PlanContext } from './planHelpers'
-import { computeInstallment } from './installment'
+import { computeInstallment, resolveOfficialQuote } from './installment'
 import { normalizeYen } from './money'
 
 const ITEM_LABELS: Record<MaintenanceItemKey, string> = {
@@ -75,16 +75,27 @@ export function calculateOmatomePlan(scenario: Scenario, ctx: PlanContext): Plan
       ? normalizeYen(input.monthlyPayment)
       : null
 
+  // 正式見積（初回/2回目以降月額/回数）の手入力があれば最優先。
+  const official = resolveOfficialQuote(input.official)
+
   let initialPayment: number
   let equalMonthly: number
   let installmentTotal: number
   let interestFee: number
+  let paymentCount: number
 
-  if (overrideMonthly !== null && months > 0) {
+  if (official) {
+    initialPayment = official.initialPayment
+    equalMonthly = official.equalMonthly
+    installmentTotal = official.monthlyScheduleTotal
+    interestFee = Math.max(0, installmentTotal - principal)
+    paymentCount = official.paymentCount
+  } else if (overrideMonthly !== null && months > 0) {
     equalMonthly = overrideMonthly
     installmentTotal = overrideMonthly * months
     initialPayment = overrideMonthly
     interestFee = Math.max(0, installmentTotal - principal)
+    paymentCount = months
   } else {
     const inst = computeInstallment({
       principal,
@@ -97,6 +108,7 @@ export function calculateOmatomePlan(scenario: Scenario, ctx: PlanContext): Plan
     equalMonthly = inst.equalMonthly
     installmentTotal = inst.totalPayment
     interestFee = inst.interestFee
+    paymentCount = months
   }
 
   const totalPayment = downPayment + installmentTotal
@@ -131,7 +143,7 @@ export function calculateOmatomePlan(scenario: Scenario, ctx: PlanContext): Plan
     planId: 'omatome',
     label: PLAN_LABELS.omatome,
     isVisible: true,
-    isComplete: principal > 0 && months > 0,
+    isComplete: principal > 0 && (official ? true : months > 0),
     totalPayment,
     effectiveTotal,
     effectiveMonthly,
@@ -139,7 +151,7 @@ export function calculateOmatomePlan(scenario: Scenario, ctx: PlanContext): Plan
     monthlyPayment: equalMonthly,
     secondAndLaterMonthlyPayment: equalMonthly,
     finalPayment: equalMonthly,
-    paymentCount: months,
+    paymentCount,
     bonusPayment: 0,
     bonusPaymentCount: 0,
     residualValue: 0,

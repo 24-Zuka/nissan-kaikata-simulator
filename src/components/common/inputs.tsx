@@ -141,6 +141,42 @@ export function SelectField<T extends string>({
   )
 }
 
+type MonthMultiSelectProps = {
+  label: string
+  selected: number[]
+  onChange: (months: number[]) => void
+  hint?: string
+}
+
+/** ボーナス月（1-12）の複数選択。選んだ月の数 × 年数 が加算回数になる。 */
+export function MonthMultiSelect({ label, selected, onChange, hint }: MonthMultiSelectProps) {
+  const set = new Set(selected)
+  const toggle = (m: number) => {
+    const next = new Set(set)
+    if (next.has(m)) next.delete(m)
+    else next.add(m)
+    onChange([...next].sort((a, b) => a - b))
+  }
+  return (
+    <div className="field field--full">
+      <span className="field__label">{label}</span>
+      <div className="monthsel">
+        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+          <label key={m} className={set.has(m) ? 'monthsel__btn is-on' : 'monthsel__btn'}>
+            <input
+              type="checkbox"
+              checked={set.has(m)}
+              onChange={() => toggle(m)}
+            />
+            <span>{m}月</span>
+          </label>
+        ))}
+      </div>
+      {hint ? <span className="field__hint">{hint}</span> : null}
+    </div>
+  )
+}
+
 type CheckFieldProps = {
   id?: string
   label: string

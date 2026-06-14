@@ -133,6 +133,108 @@ describe('おまとめプラン', () => {
   })
 })
 
+describe('正式見積入力モード（手入力優先）', () => {
+  it('クレジット: 手入力の初回/月額/回数が優先され、総額=頭金+初回+月額×回数', () => {
+    const s = makeScenario({
+      ...baseScenario,
+      credit: {
+        downPayment: 200_000,
+        annualRate: 3.9,
+        months: 60,
+        bonusPayment: 0,
+        bonusMonths: [],
+        official: {
+          useOfficialQuote: true,
+          firstPayment: 53_200,
+          monthlyPayment: 42_000,
+          monthlyCount: 59,
+        },
+      },
+    })
+    const r = calculateScenario(s).credit
+    expect(r.initialPayment).toBe(53_200)
+    expect(r.monthlyPayment).toBe(42_000)
+    expect(r.paymentCount).toBe(60) // 1 + 59
+    const expectedTotal = 200_000 + 53_200 + 42_000 * 59
+    expect(r.totalPayment).toBe(expectedTotal)
+    // 支払予定の総和 = 支払総額。
+    expect(r.initialPayment + r.monthlyPayment * 59 + r.breakdown.downPayment).toBe(r.totalPayment)
+  })
+
+  it('正式見積が無効（OFF/未入力）なら計算値を使う（既存結果不変）', () => {
+    const off = calculateScenario(makeScenario({ ...baseScenario })).credit
+    const withEmptyOfficial = calculateScenario(
+      makeScenario({
+        ...baseScenario,
+        credit: { ...makeScenario(baseScenario).credit, official: { useOfficialQuote: true } },
+      }),
+    ).credit
+    expect(withEmptyOfficial.totalPayment).toBe(off.totalPayment)
+  })
+
+  it('おまとめ: 手入力の月額系列が優先される', () => {
+    const s = makeScenario({
+      ...baseScenario,
+      omatome: {
+        months: 60,
+        downPayment: 0,
+        annualRate: 3.9,
+        includeInspection: false,
+        includeLegalInspection: false,
+        includeSixMonthInspection: false,
+        includeTires: false,
+        includeTax: false,
+        includeInsurance: false,
+        monthlyPayment: '',
+        official: { useOfficialQuote: true, firstPayment: 60_000, monthlyPayment: 48_000, monthlyCount: 59 },
+      },
+    })
+    const r = calculateScenario(s).omatome
+    expect(r.initialPayment).toBe(60_000)
+    expect(r.monthlyPayment).toBe(48_000)
+    expect(r.paymentCount).toBe(60)
+  })
+})
+
+describe('BVC 概算残価率', () => {
+  it('residualValue=0 かつ residualRate>0 のとき 見積総額×率 で残価を導出', () => {
+    const s = makeScenario({
+      ...baseScenario,
+      bvc: {
+        downPayment: 0,
+        annualRate: 3.9,
+        months: 60,
+        residualValue: 0,
+        residualRate: 30,
+        bonusPayment: 0,
+        bonusMonths: [],
+        mode: 'purchase',
+      },
+    })
+    const r = calculateScenario(s).bvc
+    // grossTotal = 2,900,000 → 30% = 870,000
+    expect(r.residualValue).toBe(870_000)
+    expect(r.finalPayment).toBe(870_000) // 買取時は最終回に残価
+  })
+
+  it('residualValue が明示されていれば率より優先', () => {
+    const s = makeScenario({
+      ...baseScenario,
+      bvc: {
+        downPayment: 0,
+        annualRate: 3.9,
+        months: 60,
+        residualValue: 1_000_000,
+        residualRate: 30,
+        bonusPayment: 0,
+        bonusMonths: [],
+        mode: 'purchase',
+      },
+    })
+    expect(calculateScenario(s).bvc.residualValue).toBe(1_000_000)
+  })
+})
+
 describe('現状維持', () => {
   it('未入力なら isVisible=false', () => {
     const r = calculateScenario(baseScenario).statusQuo

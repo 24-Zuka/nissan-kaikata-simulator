@@ -19,6 +19,7 @@
  */
 
 import Decimal from 'decimal.js'
+import type { OfficialQuoteInput } from './types'
 import { ROUNDING_CONFIG, normalizeYen, floorYen, roundYen } from './money'
 
 /** 月利を Decimal で返す。年率%（例 3.9）→ 月利。 */
@@ -157,6 +158,43 @@ const emptyResult = (principal: number, residual: number): InstallmentResult => 
   totalPayment: 0,
   interestFee: 0,
 })
+
+/** 正式見積（手入力）の解決結果。 */
+export type OfficialQuoteResolved = {
+  /** 初回支払額 */
+  initialPayment: number
+  /** 2回目以降月額 */
+  equalMonthly: number
+  /** 2回目以降回数 */
+  subsequentCount: number
+  /** 月々支払の総和（初回 + 月額 × 2回目以降回数）。残価・頭金は含まない。 */
+  monthlyScheduleTotal: number
+  /** 月々支払の総回数（= 1 + 2回目以降回数）。 */
+  paymentCount: number
+}
+
+/**
+ * 正式見積の手入力を解決する。
+ * useOfficialQuote かつ 2回目以降月額>0・回数>0 のときのみ有効。無効なら null（＝計算値を使う）。
+ * 月々総和 = 初回 + 月額 × 2回目以降回数（残価・頭金は呼び出し側で加算）。
+ */
+export function resolveOfficialQuote(o: OfficialQuoteInput | undefined): OfficialQuoteResolved | null {
+  if (!o || !o.useOfficialQuote) return null
+  const monthly = normalizeYen(o.monthlyPayment)
+  const count = Math.max(0, Math.trunc(normalizeYen(o.monthlyCount)))
+  if (monthly <= 0 || count <= 0) return null
+  // 初回は明示があればそれ、無ければ月額と同額。
+  const first =
+    o.firstPayment === '' || o.firstPayment === undefined ? monthly : normalizeYen(o.firstPayment)
+  const monthlyScheduleTotal = first + monthly * count
+  return {
+    initialPayment: first,
+    equalMonthly: monthly,
+    subsequentCount: count,
+    monthlyScheduleTotal,
+    paymentCount: 1 + count,
+  }
+}
 
 export function computeInstallment(params: InstallmentParams): InstallmentResult {
   const principal = normalizeYen(params.principal)

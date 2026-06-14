@@ -275,6 +275,186 @@ body {
   margin-top: 6px;
 }
 
+/* 契約年数プリセット */
+.preset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.preset__btn {
+  min-width: 56px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink-2);
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.preset__btn.is-on {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+/* ボーナス月の複数選択 */
+.monthsel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.monthsel__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink-2);
+  font-size: 0.88rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.monthsel__btn.is-on {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+/* チェックボックス自体は隠してボタン見た目に統一 */
+.monthsel__btn input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* 正式見積（手入力）セクション */
+.officialquote {
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  background: var(--surface-2);
+}
+
+.officialquote__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* A/B/C パターンバー */
+.patternbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.patternbar__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.patterntab {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  max-width: 260px;
+  overflow: hidden;
+}
+
+.patterntab.is-active {
+  border-color: var(--red);
+  box-shadow: inset 0 -2px 0 var(--red);
+}
+
+.patterntab__main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: none;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.patterntab__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  flex: 0 0 auto;
+}
+
+.patterntab__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.patterntab__del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  align-self: stretch;
+  border: none;
+  border-left: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.patterntab__del:hover {
+  background: var(--line-2);
+  color: var(--red);
+}
+
+.patternbar__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.app__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media print {
+  .patternbar {
+    display: none;
+  }
+}
+
 /* Quick result (input bottom, small) */
 .quickresult {
   background: var(--surface-2);

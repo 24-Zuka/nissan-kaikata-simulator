@@ -9,7 +9,7 @@
 import type { PlanResult, Scenario } from './types'
 import { PLAN_LABELS } from './constants'
 import { createBreakdown, effectiveMonthlyOf, type PlanContext } from './planHelpers'
-import { computeInstallment } from './installment'
+import { computeInstallment, resolveOfficialQuote } from './installment'
 import { normalizeYen } from './money'
 
 export function calculateCreditPlan(scenario: Scenario, ctx: PlanContext): PlanResult {
@@ -32,7 +32,18 @@ export function calculateCreditPlan(scenario: Scenario, ctx: PlanContext): PlanR
     bonusMonths: input.bonusMonths,
   })
 
-  const totalPayment = downPayment + inst.totalPayment
+  // 正式見積（手入力）があれば手入力値を優先する。
+  const official = resolveOfficialQuote(input.official)
+  const initialPayment = official ? official.initialPayment : inst.initialPayment
+  const equalMonthly = official ? official.equalMonthly : inst.equalMonthly
+  const paymentCount = official ? official.paymentCount : inst.monthlyCount
+  const scheduleTotal = official ? official.monthlyScheduleTotal : inst.monthlyScheduleTotal
+  const installmentTotal = official ? scheduleTotal : inst.totalPayment
+  const interestFee = official
+    ? Math.max(0, installmentTotal - principal)
+    : inst.interestFee
+
+  const totalPayment = downPayment + installmentTotal
   const effectiveTotal = totalPayment + maintenance.total
   const effectiveMonthly = effectiveMonthlyOf(effectiveTotal, comparisonMonths)
 
@@ -51,7 +62,7 @@ export function calculateCreditPlan(scenario: Scenario, ctx: PlanContext): PlanR
     taxCost: maintenance.byKey.tax,
     insuranceCost: maintenance.byKey.insurance,
     omatomeExcludedCost: maintenance.total,
-    interestFee: inst.interestFee,
+    interestFee,
     residualValue: 0,
     totalPayment,
     effectiveTotal,
@@ -62,19 +73,19 @@ export function calculateCreditPlan(scenario: Scenario, ctx: PlanContext): PlanR
     planId: 'credit',
     label: PLAN_LABELS.credit,
     isVisible: true,
-    isComplete: principal > 0 && normalizeYen(input.months) > 0,
+    isComplete: principal > 0 && (official ? true : normalizeYen(input.months) > 0),
     totalPayment,
     effectiveTotal,
     effectiveMonthly,
-    initialPayment: inst.initialPayment,
-    monthlyPayment: inst.equalMonthly,
-    secondAndLaterMonthlyPayment: inst.equalMonthly,
-    finalPayment: inst.equalMonthly,
-    paymentCount: inst.monthlyCount,
-    bonusPayment: inst.bonusPayment,
-    bonusPaymentCount: inst.bonusCount,
+    initialPayment,
+    monthlyPayment: equalMonthly,
+    secondAndLaterMonthlyPayment: equalMonthly,
+    finalPayment: equalMonthly,
+    paymentCount,
+    bonusPayment: official ? 0 : inst.bonusPayment,
+    bonusPaymentCount: official ? 0 : inst.bonusCount,
     residualValue: 0,
-    interestFee: inst.interestFee,
+    interestFee,
     includedItems: [],
     excludedItems: ['車検', '法定12か月点検', '6か月点検', '夏・冬タイヤ', '自動車税', '任意保険'],
     breakdown,

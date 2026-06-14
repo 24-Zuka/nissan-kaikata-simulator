@@ -98,6 +98,8 @@ export const MAINTENANCE_CYCLE = {
 export const STORAGE_KEYS = {
   scenario: 'nkks:scenario:v1',
   scenarioList: 'nkks:scenario-list:v1',
+  /** A/B/C ワークスペース（最大3パターン）。 */
+  workspace: 'nkks:workspace:v1',
 } as const
 
 /** デフォルトの維持費入力（任意保険は未入力）。クラスに応じた金額を埋める。 */

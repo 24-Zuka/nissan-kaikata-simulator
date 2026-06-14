@@ -18,6 +18,7 @@ export function App() {
   const state = useScenarioState()
   const { scenario, result } = state
   const visibility = useStatusQuoVisibility(scenario.currentCar)
+  const patternLabels = ['A', 'B', 'C']
   const [view, setView] = useState<View>('input')
   const [notice, setNotice] = useState<string>('')
   const fileRef = useRef<HTMLInputElement>(null)
@@ -135,6 +136,64 @@ export function App() {
           />
         </div>
       </header>
+
+      {/* A/B/C パターン切替（最大3パターン） */}
+      <div className="patternbar" role="tablist" aria-label="比較パターン">
+        <div className="patternbar__tabs">
+          {state.patterns.map((p, i) => {
+            const label = patternLabels[i] ?? String(i + 1)
+            return (
+              <div
+                key={p.id}
+                className={p.id === state.activeId ? 'patterntab is-active' : 'patterntab'}
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={p.id === state.activeId}
+                  className="patterntab__main"
+                  onClick={() => state.switchPattern(p.id)}
+                >
+                  <span className="patterntab__badge">{label}</span>
+                  <span className="patterntab__name">{p.name || '無題'}</span>
+                </button>
+                {state.canDeletePattern ? (
+                  <button
+                    type="button"
+                    className="patterntab__del"
+                    aria-label={`パターン${label}を削除`}
+                    onClick={() => {
+                      if (window.confirm(`パターン${label}を削除しますか？`)) {
+                        state.deletePattern(p.id)
+                      }
+                    }}
+                  >
+                    ×
+                  </button>
+                ) : null}
+              </div>
+            )
+          })}
+        </div>
+        <div className="patternbar__actions">
+          <button
+            type="button"
+            className="app__btn"
+            disabled={!state.canAddPattern}
+            onClick={() => state.addPattern()}
+          >
+            ＋ 追加
+          </button>
+          <button
+            type="button"
+            className="app__btn"
+            disabled={!state.canAddPattern}
+            onClick={() => state.duplicatePattern()}
+          >
+            複製
+          </button>
+        </div>
+      </div>
 
       {notice ? <div className="app__notice" role="status">{notice}</div> : null}
 

@@ -13,8 +13,8 @@
 import type { BvcInput, PlanResult, Scenario } from './types'
 import { PLAN_LABELS } from './constants'
 import { createBreakdown, effectiveMonthlyOf, type PlanContext } from './planHelpers'
-import { computeInstallment } from './installment'
-import { clampYen, normalizeYen } from './money'
+import { computeInstallment, resolveOfficialQuote } from './installment'
+import { clampYen, normalizeYen, roundYen, Decimal } from './money'
 
 export function calculateBvcPlan(
   scenario: Scenario,
@@ -27,8 +27,13 @@ export function calculateBvcPlan(
 
   const downPayment = normalizeYen(input.downPayment)
   const principal = Math.max(0, estimate.payableTotal - downPayment)
+  // 残価: 明示の residualValue を優先。未入力(0)かつ概算残価率があれば 見積総額×率 で導出。
+  const rate = Math.max(0, input.residualRate ?? 0)
+  const residualFromRate =
+    rate > 0 ? roundYen(new Decimal(estimate.grossTotal).mul(rate).div(100)) : 0
+  const residualRaw = normalizeYen(input.residualValue) > 0 ? input.residualValue : residualFromRate
   // 残価は 0〜元金 にクランプ（残価が元金を超えないように）。
-  const residual = clampYen(input.residualValue, 0, principal)
+  const residual = clampYen(residualRaw, 0, principal)
 
   const isPurchase = mode === 'purchase'
 
@@ -42,7 +47,19 @@ export function calculateBvcPlan(
     bonusMonths: input.bonusMonths,
   })
 
-  const totalPayment = downPayment + inst.totalPayment
+  // 正式見積（手入力）があれば月々の支払系列を手入力値で置き換える（残価の据置は維持）。
+  const official = resolveOfficialQuote(input.official)
+  const initialPayment = official ? official.initialPayment : inst.initialPayment
+  const equalMonthly = official ? official.equalMonthly : inst.equalMonthly
+  const paymentCount = official ? official.paymentCount : inst.monthlyCount
+  const monthlyScheduleTotal = official ? official.monthlyScheduleTotal : inst.monthlyScheduleTotal
+  const residualPaid = isPurchase ? residual : 0
+  const installmentTotal = official ? monthlyScheduleTotal + residualPaid : inst.totalPayment
+  const interestFee = official
+    ? Math.max(0, monthlyScheduleTotal + residual - principal)
+    : inst.interestFee
+
+  const totalPayment = downPayment + installmentTotal
   const effectiveTotal = totalPayment + maintenance.total
   const effectiveMonthly = effectiveMonthlyOf(effectiveTotal, comparisonMonths)
 
@@ -61,7 +78,7 @@ export function calculateBvcPlan(
     taxCost: maintenance.byKey.tax,
     insuranceCost: maintenance.byKey.insurance,
     omatomeExcludedCost: maintenance.total,
-    interestFee: inst.interestFee,
+    interestFee,
     residualValue: residual,
     totalPayment,
     effectiveTotal,
@@ -72,20 +89,20 @@ export function calculateBvcPlan(
     planId: 'bvc',
     label: PLAN_LABELS.bvc,
     isVisible: true,
-    isComplete: principal > 0 && normalizeYen(input.months) > 0,
+    isComplete: principal > 0 && (official ? true : normalizeYen(input.months) > 0),
     totalPayment,
     effectiveTotal,
     effectiveMonthly,
-    initialPayment: inst.initialPayment,
-    monthlyPayment: inst.equalMonthly,
-    secondAndLaterMonthlyPayment: inst.equalMonthly,
+    initialPayment,
+    monthlyPayment: equalMonthly,
+    secondAndLaterMonthlyPayment: equalMonthly,
     // 最終回支払額 = 残価（買取時は支払う、返却時は支払わない）。
     finalPayment: isPurchase ? residual : 0,
-    paymentCount: inst.monthlyCount,
-    bonusPayment: inst.bonusPayment,
-    bonusPaymentCount: inst.bonusCount,
+    paymentCount,
+    bonusPayment: official ? 0 : inst.bonusPayment,
+    bonusPaymentCount: official ? 0 : inst.bonusCount,
     residualValue: residual,
-    interestFee: inst.interestFee,
+    interestFee,
     includedItems: [],
     excludedItems: ['車検', '法定12か月点検', '6か月点検', '夏・冬タイヤ', '自動車税', '任意保険'],
     breakdown,

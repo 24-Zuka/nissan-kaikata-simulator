@@ -63,6 +63,23 @@ export type CashInput = {
   _placeholder?: never
 }
 
+/**
+ * 正式見積（NFS支払予定表）の手入力。
+ * useOfficialQuote=true かつ必要値が入力されているとき、計算値より手入力値を優先する。
+ * 既定は未使用（undefined/false）のため既存の計算結果は変わらない。
+ */
+export type OfficialQuoteInput = {
+  useOfficialQuote?: boolean
+  /** 初回支払額 */
+  firstPayment?: OptionalYen
+  /** 2回目以降月額 */
+  monthlyPayment?: OptionalYen
+  /** 2回目以降回数 */
+  monthlyCount?: OptionalYen
+  /** 最終回支払額（BVCは残価。未指定ならプラン既定）。 */
+  finalPayment?: OptionalYen
+}
+
 export type CreditInput = {
   /** 分割対象元金の上書き（正式見積転記用）。未指定なら支払対象総額-頭金から算出。 */
   principalOverride?: number
@@ -73,6 +90,8 @@ export type CreditInput = {
   bonusPayment: number
   /** ボーナス加算月（1-12）。例: [1, 7] */
   bonusMonths: number[]
+  /** 正式見積の手入力（任意）。 */
+  official?: OfficialQuoteInput
 }
 
 export type BvcInput = {
@@ -81,10 +100,14 @@ export type BvcInput = {
   months: number
   /** 残価（最終回据置額） */
   residualValue: number
+  /** 概算残価率(%)。residualValue が 0 のときのみ、見積総額×率 で残価を導出する（任意）。 */
+  residualRate?: number
   bonusPayment: number
   bonusMonths: number[]
   /** return=返却 / purchase=買取 */
   mode: 'return' | 'purchase'
+  /** 正式見積の手入力（任意）。 */
+  official?: OfficialQuoteInput
 }
 
 export type OmatomeInput = {
@@ -99,6 +122,8 @@ export type OmatomeInput = {
   includeInsurance: boolean
   /** 月額の直接上書き（正式見積転記用） */
   monthlyPayment?: OptionalYen
+  /** 正式見積の手入力（任意）。monthlyPayment より詳細な初回/回数指定に使う。 */
+  official?: OfficialQuoteInput
 }
 
 export type Scenario = {
@@ -129,6 +154,20 @@ export type Scenario = {
   bvc: BvcInput
   omatome: OmatomeInput
 }
+
+/**
+ * A/B/C 比較のためのワークスペース。最大3パターンを保持する。
+ * 各パターンは独立した Scenario（車両・見積・支払条件）を持つ。
+ */
+export type ScenarioWorkspace = {
+  /** 1〜3 パターン。 */
+  patterns: Scenario[]
+  /** 現在編集中のパターンID。 */
+  activeId: string
+}
+
+/** A/B/C パターンの上限。 */
+export const MAX_PATTERNS = 3
 
 // ---------------------------------------------------------------------------
 // 出力モデル
