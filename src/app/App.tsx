@@ -11,7 +11,6 @@ import { calculateComparison } from '../domain/comparison'
 import { createInitialScenario } from '../domain/defaults'
 import type { CloudScenarioSummary, SavedScenario, Scenario } from '../domain/types'
 import { LoginScreen } from '../features/auth/LoginScreen'
-import { PwaUpdatePrompt } from '../components/PwaUpdatePrompt'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { BrandMark } from '../components/BrandMark'
 import {
@@ -644,8 +643,6 @@ export default function App({ externalAuth }: AppProps = {}) {
           </button>
         </section>
       )}
-
-      <PwaUpdatePrompt />
 
       {message && (
         <div className="notice" role="status">
