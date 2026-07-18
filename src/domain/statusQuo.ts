@@ -1,100 +1,148 @@
-/**
- * 現状維持プラン（現在の車に乗り続ける）（純粋関数）。
- *
- * 含める項目: 過去の購入額・残債・残りローン支払・月の支払額・車検・点検・夏冬タイヤ・
- *            自動車税・任意保険・維持費。
- *
- * 表示条件は visibility.ts（過去購入額>0 または 月支払額>0 のときのみ比較表示）。
- *
- * TODO(SPEC): 過去購入額の合算方法、残ローンと残債の関係、現在車の維持費周期は
- *             既存仕様が無いため下記の素直な解釈を採用。NFS/実務確認で確定する。
- */
-
-import type { PlanResult, Scenario } from './types'
-import { PLAN_LABELS } from './constants'
-import { createBreakdown, effectiveMonthlyOf, type PlanContext } from './planHelpers'
-import { countInspections, countTireReplacements } from './maintenance'
-import { getStatusQuoVisibility } from './visibility'
+import { calculateMaintenance, maintenanceYearsToMonths } from './maintenance'
 import { normalizeYen } from './money'
-import { MAINTENANCE_CYCLE } from './constants'
+import { createPlanResult, effectiveMonthly } from './planHelpers'
+import type { CurrentCarInput, PlanResult, Scenario, StatusQuoVisibility } from './types'
 
-export function calculateStatusQuoPlan(scenario: Scenario, ctx: PlanContext): PlanResult {
-  const { comparisonMonths } = ctx
-  const cc = scenario.currentCar
-  const years = Math.max(0, Math.round(comparisonMonths / 12))
+const FIRST_REGISTRATION_PATTERN = /^\d{4}-\d{2}$/
 
-  const originalPurchasePrice = normalizeYen(cc.originalPurchasePrice)
-  const remainingLoanBalance = normalizeYen(cc.remainingLoanBalance)
-  const remainingLoanMonths = Math.max(0, Math.trunc(normalizeYen(cc.remainingLoanMonths)))
-  const monthlyPayment = normalizeYen(cc.monthlyPayment)
+export function getStatusQuoVisibility(
+  currentCar: CurrentCarInput,
+): StatusQuoVisibility {
+  const hasComparisonValue =
+    normalizeYen(currentCar.originalPurchasePrice) > 0 ||
+    normalizeYen(currentCar.monthlyPayment) > 0 ||
+    normalizeYen(currentCar.remainingDebt) > 0
 
-  // 残りローン支払: 月額 × min(残回数, 比較月数)。残回数の上限制御。
-  const payableLoanMonths = Math.min(remainingLoanMonths, comparisonMonths)
-  const loanPaidByMonthly = monthlyPayment * payableLoanMonths
-  // 残債と月額×残回数の大きい方は取らず、ローン支払は月額×残回数を採用。
-  // 残債は内訳表示用に保持する。
-
-  // 現在車の維持費（中古として周期計算）。
-  const annualTax = normalizeYen(cc.annualTax)
-  const inspectionUnit = normalizeYen(cc.inspectionCost)
-  const maintenanceUnit = normalizeYen(cc.maintenanceCost)
-  const tireUnit = normalizeYen(cc.tireCost)
-  const insuranceMonthly = normalizeYen(cc.insuranceMonthly)
-
-  const inspectionCount = countInspections(years, 'used')
-  const tireCount = countTireReplacements(years, MAINTENANCE_CYCLE.tireDefaultCycleYears)
-
-  const taxCost = annualTax * years
-  const inspectionCost = inspectionUnit * inspectionCount
-  const maintenanceCost = maintenanceUnit * years // 年あたり維持費 × 年数
-  const tireCost = tireUnit * tireCount
-  const insuranceCost = insuranceMonthly * 12 * years
-
-  const maintenanceTotal = taxCost + inspectionCost + maintenanceCost + tireCost + insuranceCost
-
-  // 支払総額（これから支払う額）= 残りローン支払。
-  const totalPayment = loanPaidByMonthly
-  // 実質総額 = 過去購入額 + これからのローン + 維持費。
-  const effectiveTotal = originalPurchasePrice + loanPaidByMonthly + maintenanceTotal
-  const effectiveMonthly = effectiveMonthlyOf(effectiveTotal, comparisonMonths)
-
-  const visibility = getStatusQuoVisibility(cc)
-
-  const breakdown = createBreakdown({
-    principal: remainingLoanBalance,
-    downPayment: 0,
-    inspectionCost,
-    maintenanceCost,
-    tireCost,
-    taxCost,
-    insuranceCost,
-    omatomeExcludedCost: maintenanceTotal,
-    totalPayment,
-    effectiveTotal,
-    effectiveMonthly,
-  })
-
+  // 現状維持は、過去購入額・今後の月払い・残債のいずれかが入力された場合に比較対象として表示する。
   return {
+    showInDetailComparison: hasComparisonValue,
+    showInPrintComparison: hasComparisonValue,
+    showInCustomerPresentation: hasComparisonValue,
+    showInDifferenceComparison: hasComparisonValue,
+    showPastPurchasePriceRow: normalizeYen(currentCar.originalPurchasePrice) > 0,
+  }
+}
+
+function monthIndex(year: number, month: number): number {
+  return year * 12 + month
+}
+
+function currentMonthIndex(today = new Date()): number {
+  return monthIndex(today.getFullYear(), today.getMonth())
+}
+
+function parseRegistrationMonth(value: string): number | null {
+  if (!FIRST_REGISTRATION_PATTERN.test(value)) return null
+  const [yearText, monthText] = value.split('-')
+  const year = Number(yearText)
+  const month = Number(monthText)
+  if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
+    return null
+  }
+  return monthIndex(year, month - 1)
+}
+
+export function calculateCurrentCarInspectionMonths(
+  firstRegistrationMonth: string,
+  maintenanceMonths: number,
+  today = new Date(),
+): { months: number[]; warning?: string } {
+  const registrationMonth = parseRegistrationMonth(firstRegistrationMonth)
+  const startMonth = currentMonthIndex(today)
+
+  if (registrationMonth === null) {
+    return {
+      months: [],
+      warning: '現在の車の初度登録年月が未入力のため、車検費用は計算していません。',
+    }
+  }
+  if (registrationMonth > startMonth) {
+    return {
+      months: [],
+      warning: '現在の車の初度登録年月が未来日のため、車検費用は計算していません。',
+    }
+  }
+
+  const ageAtStart = startMonth - registrationMonth
+  const ageAtEnd = ageAtStart + Math.max(0, Math.floor(maintenanceMonths || 0))
+  const months: number[] = []
+
+  for (let inspectionAge = 36; inspectionAge < ageAtEnd; inspectionAge += 24) {
+    if (inspectionAge >= ageAtStart) months.push(inspectionAge - ageAtStart)
+  }
+
+  return { months }
+}
+
+export function calculateStatusQuo(scenario: Scenario): PlanResult {
+  const current = scenario.currentCar
+  const visibility = getStatusQuoVisibility(current)
+  const remainingPayments = Math.max(0, Math.floor(Number(current.remainingPayments) || 0))
+  const monthlyPayment = normalizeYen(current.monthlyPayment)
+  const scheduledRemaining = monthlyPayment * remainingPayments
+  const remainingDebt = normalizeYen(current.remainingDebt)
+  const futureLoanPayment = scheduledRemaining > 0 ? scheduledRemaining : remainingDebt
+  const originalPurchasePrice = normalizeYen(current.originalPurchasePrice)
+  const maintenanceMonths = maintenanceYearsToMonths(current.currentMaintenanceYears)
+  const currentCarInspections = calculateCurrentCarInspectionMonths(
+    current.firstRegistrationMonth,
+    maintenanceMonths,
+  )
+  const maintenance = calculateMaintenance({
+    comparisonMonths: maintenanceMonths,
+    inspectionCost: current.inspectionCost,
+    legalInspectionCost: current.legalInspectionCost,
+    sixMonthInspectionCost: current.sixMonthInspectionCost,
+    tireCost: current.tireCost,
+    annualTax: current.annualTax,
+    monthlyInsurance: current.monthlyInsurance,
+    tireCycleYears: Number(current.tireCycleYears) || 4,
+    includeInsurance: true,
+    repairCost: current.repairCost,
+    vehicleCondition: 'used',
+    nextInspectionMonths: '',
+    inspectionMonthsOverride: currentCarInspections.months,
+    inspectionCycleLabel: '初度登録から3年目・以後2年ごと',
+    inspectionWarning: currentCarInspections.warning,
+  })
+  const totalPayment = originalPurchasePrice + futureLoanPayment
+  const effectiveTotal = totalPayment + maintenance.total
+  const maintenanceMonthly = effectiveMonthly(maintenance.total, maintenanceMonths)
+  const futurePaymentMonthly = monthlyPayment > 0
+    ? monthlyPayment
+    : effectiveMonthly(remainingDebt, maintenanceMonths)
+  const statusQuoEffectiveMonthly = futurePaymentMonthly + maintenanceMonthly
+  const warnings = [...maintenance.warnings]
+  const complete = visibility.showInDetailComparison && !currentCarInspections.warning
+
+  if (remainingDebt > 0 && scheduledRemaining > 0 && scheduledRemaining < remainingDebt) {
+    warnings.push('残り支払予定額が残債を下回っています。月額と残り回数を確認してください。')
+  }
+
+  return createPlanResult(scenario, maintenance, {
     planId: 'statusQuo',
-    label: PLAN_LABELS.statusQuo,
-    // 比較表・印刷では visibility に従う（未入力時は非表示）。
+    label: '現状維持',
     isVisible: visibility.showInDetailComparison,
-    isComplete: originalPurchasePrice > 0 || monthlyPayment > 0,
+    isComplete: complete,
     totalPayment,
     effectiveTotal,
-    effectiveMonthly,
-    initialPayment: 0,
+    effectiveMonthlyOverride: statusQuoEffectiveMonthly,
+    maintenanceYears: current.currentMaintenanceYears,
+    priceBasis: 'current',
+    priceBasisAmount: originalPurchasePrice,
+    hasRequiredPrice: visibility.showInDetailComparison,
+    initialPayment: originalPurchasePrice,
     monthlyPayment,
     secondAndLaterMonthlyPayment: monthlyPayment,
-    finalPayment: 0,
-    paymentCount: payableLoanMonths,
-    bonusPayment: 0,
-    bonusPaymentCount: 0,
-    residualValue: 0,
-    interestFee: 0,
-    includedItems: [],
-    excludedItems: [],
-    breakdown,
-    warnings: [],
-  }
+    paymentCount: remainingPayments,
+    includedItems: ['過去の購入額', '残りローン支払', '維持費'],
+    warnings,
+    breakdown: {
+      vehiclePrice: originalPurchasePrice,
+      tradeIn: 0,
+      principal: futureLoanPayment,
+      totalPayment,
+      effectiveTotal,
+    },
+  })
 }

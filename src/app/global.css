@@ -1,0 +1,165 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", Meiryo, sans-serif;
+  color: #1d1d1f;
+  background: #f5f5f7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", Meiryo, sans-serif;
+  --font-display: var(--font-ui);
+  --page: #f5f5f7;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-subtle: #f5f5f7;
+  --surface-strong: #ececef;
+  --ink: #1d1d1f;
+  --ink-strong: #000000;
+  --muted: #6e6e73;
+  --muted-light: #8e8e93;
+  --line: #e8e8ed;
+  --line-strong: #d1d1d6;
+  --accent: #e60012;
+  --accent-hover: #c3002f;
+  --accent-soft: #fbe9ea;
+  --focus: #e60012;
+  --button-ink: #e60012;
+  --button-text: #ffffff;
+  --success: #1d7a45;
+  --success-soft: #e6f4ec;
+  --warning: #9a6b00;
+  --warning-soft: #fdf2dc;
+  --glass: rgb(255 255 255 / 82%);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 4%), 0 8px 28px rgb(0 0 0 / 3%);
+  --radius-input: 10px;
+  --radius-card: 18px;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color: #f5f5f7;
+  background: #000000;
+  --page: #000000;
+  --surface: #1c1c1e;
+  --surface-raised: #2c2c2e;
+  --surface-subtle: #242426;
+  --surface-strong: #3a3a3c;
+  --ink: #f5f5f7;
+  --ink-strong: #ffffff;
+  --muted: #98989d;
+  --muted-light: #8e8e93;
+  --line: #38383a;
+  --line-strong: #48484a;
+  --accent: #ff453a;
+  --accent-hover: #ff6961;
+  --accent-soft: rgb(255 69 58 / 15%);
+  --focus: #ff453a;
+  --button-ink: #ff453a;
+  --button-text: #ffffff;
+  --success: #30d158;
+  --success-soft: rgb(48 209 88 / 14%);
+  --warning: #ffd60a;
+  --warning-soft: rgb(255 214 10 / 14%);
+  --glass: rgb(28 28 30 / 84%);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 34%);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--page);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: var(--page);
+  color: var(--ink);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+input[aria-invalid="true"],
+select[aria-invalid="true"] {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-input);
+  background: var(--surface-subtle);
+  color: var(--ink);
+  padding: 11px 13px;
+  outline: none;
+  transition: border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--focus);
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--focus), 0 0 0 4px color-mix(in srgb, var(--focus) 12%, transparent);
+}
+
+input::placeholder {
+  color: var(--muted-light);
+}
+
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+  accent-color: var(--accent);
+}
+
+table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+button:focus-visible,
+summary:focus-visible,
+a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 42%, transparent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

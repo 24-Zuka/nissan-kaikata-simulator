@@ -1,221 +1,182 @@
-/**
- * 維持費計算（純粋関数）
- *
- * シミュレーション期間にわたる各維持費項目の「1回あたり金額・周期・回数・合計」を算出する。
- * 任意保険は未入力('')のときは金額0かつ entered=false とし、表示側で「未入力」を表せるようにする。
- *
- * 回数・周期は資料依存のため TODO(SPEC) を付して既定値を採用している。
- */
+import Decimal from 'decimal.js'
+import { normalizeOptionalYen, normalizeYen, roundYen } from './money'
+import type {
+  MaintenanceBreakdownItem,
+  MaintenanceInput,
+  MaintenanceResult,
+  Scenario,
+  VehicleCondition,
+} from './types'
 
-import type { MaintenanceInput, VehicleMode } from './types'
-import { MAINTENANCE_CYCLE } from './constants'
-import { normalizeYen } from './money'
-
-export type MaintenanceItemKey =
-  | 'inspection'
-  | 'legalInspection'
-  | 'sixMonthInspection'
-  | 'tax'
-  | 'tires'
-  | 'insurance'
-
-export type MaintenanceItem = {
-  key: MaintenanceItemKey
-  /** 表示名。タイヤは必ず「夏・冬タイヤ」。 */
-  label: string
-  /** 1回あたり金額。保険は月額。 */
-  unitCost: number
-  /** 周期の表示ラベル。例: "2年ごと" "毎年" "6か月ごと" "月額" */
-  cycleLabel: string
-  /** 回数。保険は対象月数。 */
-  count: number
-  /** 合計 = unitCost * count（非負整数）。 */
-  total: number
-  /** 月額項目か（保険）。 */
-  isMonthly: boolean
-  /** 入力済みか（任意保険の未入力判定に使用）。 */
-  entered: boolean
+export function normalizeMaintenanceMonths(value: number | ''): number {
+  return Math.min(240, Math.max(1, Math.floor(Number(value) || 1)))
 }
 
-export type MaintenanceResult = {
-  items: MaintenanceItem[]
-  /** 維持費合計（保険を含む・includeInsurance=falseなら保険0）。 */
-  total: number
-  /** 保険を除いた維持費合計。 */
-  totalExcludingInsurance: number
-  insuranceTotal: number
-  insuranceEntered: boolean
-  /** 各キー→合計 のマップ（プラン側の按分・二重計上防止に使用）。 */
-  byKey: Record<MaintenanceItemKey, number>
+export function normalizeMaintenanceYears(value: number | ''): number {
+  return Math.min(20, Math.max(1, Math.round(Number(value) || 1)))
 }
 
-export type MaintenanceContext = {
-  vehicleMode: VehicleMode
-  /** 比較に使う年数。原則 maintenance.simulationYears。 */
-  years: number
+export function maintenanceYearsToMonths(value: number | ''): number {
+  return normalizeMaintenanceYears(value) * 12
 }
 
-/**
- * 車検回数。
- * 新車: 初回3年・以後2年ごと。中古: 2年ごと（初回も2年後）。
- * TODO(SPEC): 中古/BVCの初回車検タイミングは資料で確定する。
- */
-export function countInspections(years: number, mode: VehicleMode): number {
-  const y = Math.max(0, Math.trunc(normalizeYen(years)))
-  if (y <= 0) return 0
-  if (mode === 'new') {
-    const first = MAINTENANCE_CYCLE.inspectionInitialYearsNew // 3
-    if (y < first) return 0
-    return Math.floor((y - first) / MAINTENANCE_CYCLE.inspectionSubsequentYears) + 1
-  }
-  // 中古: 2年ごと
-  return Math.floor(y / MAINTENANCE_CYCLE.inspectionSubsequentYears)
-}
-
-/**
- * 法定12か月点検回数。車検実施年は車検に含まれる想定で、その年は除外する。
- * TODO(SPEC): 車検年に別途12か月点検を行うかは資料で確定する。
- */
-export function countLegalInspections(years: number, inspections: number): number {
-  const y = Math.max(0, Math.trunc(normalizeYen(years)))
-  return Math.max(0, y - inspections)
-}
-
-/**
- * 6か月点検回数。各年の中間(6か月地点)で年1回相当として数える。
- * TODO(SPEC): 6か月点検の実施回数は資料で確定する（「6か月ごと」表記は維持）。
- */
-export function countSixMonthInspections(years: number): number {
-  return Math.max(0, Math.trunc(normalizeYen(years)))
-}
-
-/** 夏・冬タイヤの交換回数。周期年数ごと。 */
-export function countTireReplacements(years: number, cycleYears: number): number {
-  const y = Math.max(0, Math.trunc(normalizeYen(years)))
-  const c = Math.max(0, Math.trunc(normalizeYen(cycleYears)))
-  if (c <= 0) return 0
-  return Math.floor(y / c)
-}
-
-const EMPTY_BY_KEY: Record<MaintenanceItemKey, number> = {
-  inspection: 0,
-  legalInspection: 0,
-  sixMonthInspection: 0,
-  tax: 0,
-  tires: 0,
-  insurance: 0,
-}
-
-export function calculateMaintenance(
-  input: MaintenanceInput,
-  ctx: MaintenanceContext,
+export function calculateScenarioMaintenance(
+  scenario: Scenario,
+  years: number,
+  vehicleCondition: VehicleCondition = scenario.vehicle.condition,
 ): MaintenanceResult {
-  const years = Math.max(0, Math.trunc(normalizeYen(ctx.years)))
+  const maintenanceInput = vehicleCondition === 'used'
+    ? scenario.usedMaintenance
+    : scenario.newMaintenance
+  return calculateMaintenance({
+    ...maintenanceInput,
+    comparisonMonths: maintenanceYearsToMonths(years),
+    vehicleCondition,
+    nextInspectionMonths:
+      vehicleCondition === 'used' ? scenario.vehicle.nextInspectionMonths : '',
+  })
+}
 
-  const inspectionUnit = normalizeYen(input.inspectionCost)
-  const legalUnit = normalizeYen(input.legalInspectionCost)
-  const sixMonthUnit = normalizeYen(input.sixMonthInspectionCost)
-  const taxUnit = normalizeYen(input.annualTax)
-  const tireUnit = normalizeYen(input.tireCost)
+export type MaintenanceCalculationInput = MaintenanceInput & {
+  comparisonMonths: number
+  vehicleCondition: VehicleCondition
+  nextInspectionMonths: number | ''
+  inspectionMonthsOverride?: number[]
+  inspectionCycleLabel?: string
+  inspectionWarning?: string
+}
 
-  const inspectionCount = countInspections(years, ctx.vehicleMode)
-  const legalCount = countLegalInspections(years, inspectionCount)
-  const sixMonthCount = countSixMonthInspections(years)
-  const taxCount = years // 毎年
-  const tireCount = countTireReplacements(years, input.tireReplacementCycleYears)
+function occurrenceMonths(
+  start: number,
+  interval: number,
+  months: number,
+  options: { includeFinalMonth?: boolean } = {},
+): number[] {
+  if (start <= 0 || interval <= 0 || months <= 0) return []
+  const includeFinalMonth = options.includeFinalMonth ?? true
+  const occurrences: number[] = []
+  for (let month = start; includeFinalMonth ? month <= months : month < months; month += interval) {
+    occurrences.push(month)
+  }
+  return occurrences
+}
 
-  // 任意保険: 未入力('')は entered=false / total=0。includeInsurance=false でも対象外。
-  const insuranceEntered =
-    input.includeInsurance && typeof input.insuranceMonthly === 'number'
-  const insuranceMonthly = insuranceEntered ? normalizeYen(input.insuranceMonthly) : 0
-  const insuranceMonths = insuranceEntered ? years * 12 : 0
-  const insuranceTotal = insuranceMonthly * insuranceMonths
+function createBreakdownItem(
+  id: MaintenanceBreakdownItem['id'],
+  label: string,
+  unitCost: number,
+  cycleLabel: string,
+  count: number,
+): MaintenanceBreakdownItem {
+  return {
+    id,
+    label,
+    unitCost,
+    cycleLabel,
+    count,
+    total: roundYen(new Decimal(unitCost).mul(count)),
+  }
+}
 
-  const items: MaintenanceItem[] = [
-    {
-      key: 'inspection',
-      label: '車検',
-      unitCost: inspectionUnit,
-      cycleLabel:
-        ctx.vehicleMode === 'new'
-          ? `初回${MAINTENANCE_CYCLE.inspectionInitialYearsNew}年・以後${MAINTENANCE_CYCLE.inspectionSubsequentYears}年ごと`
-          : `${MAINTENANCE_CYCLE.inspectionSubsequentYears}年ごと`,
-      count: inspectionCount,
-      total: inspectionUnit * inspectionCount,
-      isMonthly: false,
-      entered: true,
-    },
-    {
-      key: 'legalInspection',
-      label: '法定12か月点検',
-      unitCost: legalUnit,
-      cycleLabel: '毎年',
-      count: legalCount,
-      total: legalUnit * legalCount,
-      isMonthly: false,
-      entered: true,
-    },
-    {
-      key: 'sixMonthInspection',
-      label: '6か月点検',
-      unitCost: sixMonthUnit,
-      cycleLabel: '6か月ごと',
-      count: sixMonthCount,
-      total: sixMonthUnit * sixMonthCount,
-      isMonthly: false,
-      entered: true,
-    },
-    {
-      key: 'tires',
-      // 「タイヤ交換」表記は使わず必ず「夏・冬タイヤ」。
-      label: '夏・冬タイヤ',
-      unitCost: tireUnit,
-      cycleLabel: `${Math.max(1, Math.trunc(normalizeYen(input.tireReplacementCycleYears)) || 1)}年ごと`,
-      count: tireCount,
-      total: tireUnit * tireCount,
-      isMonthly: false,
-      entered: true,
-    },
-    {
-      key: 'tax',
-      label: '自動車税',
-      unitCost: taxUnit,
-      cycleLabel: '毎年',
-      count: taxCount,
-      total: taxUnit * taxCount,
-      isMonthly: false,
-      entered: true,
-    },
-    {
-      key: 'insurance',
-      label: '任意保険',
-      unitCost: insuranceMonthly,
-      cycleLabel: '月額',
-      count: insuranceMonths,
-      total: insuranceTotal,
-      isMonthly: true,
-      entered: insuranceEntered,
-    },
+export function calculateMaintenance(input: MaintenanceCalculationInput): MaintenanceResult {
+  const months = Math.max(0, Math.floor(input.comparisonMonths || 0))
+  const warnings: string[] = []
+  const nextInspection = normalizeOptionalYen(input.nextInspectionMonths)
+  let inspectionStart = 36
+
+  if (input.vehicleCondition === 'used' && input.inspectionMonthsOverride === undefined) {
+    if (nextInspection === '' || nextInspection <= 0) {
+      inspectionStart = 0
+      warnings.push('中古車の次回車検までの残月数が未入力のため、車検費用は計算していません。')
+    } else {
+      inspectionStart = nextInspection
+    }
+  }
+
+  if (input.inspectionWarning) warnings.push(input.inspectionWarning)
+
+  const inspectionMonths = input.inspectionMonthsOverride
+    ? input.inspectionMonthsOverride
+      .map((month) => Math.floor(month))
+      .filter((month) => month >= 0 && month < months)
+    : occurrenceMonths(inspectionStart, 24, months, {
+      includeFinalMonth: false,
+    })
+  const inspectionSet = new Set(inspectionMonths)
+  const legalInspectionMonths = occurrenceMonths(12, 12, months).filter(
+    (month) => !inspectionSet.has(month),
+  )
+  const legalSet = new Set(legalInspectionMonths)
+  const sixMonthInspectionMonths = occurrenceMonths(6, 12, months).filter(
+    (month) => !inspectionSet.has(month) && !legalSet.has(month),
+  )
+
+  const inspectionCost = normalizeYen(input.inspectionCost)
+  const legalInspectionCost = normalizeYen(input.legalInspectionCost)
+  const sixMonthInspectionCost = normalizeYen(input.sixMonthInspectionCost)
+  const tireCost = normalizeYen(input.tireCost)
+  const annualTax = normalizeYen(input.annualTax)
+  const monthlyInsurance = normalizeYen(input.monthlyInsurance)
+  const repairCost = normalizeYen(input.repairCost)
+  const tireCycleYears = normalizeMaintenanceYears(input.tireCycleYears || 4)
+  const tireCycleMonths = tireCycleYears * 12
+  const tireCount = Math.floor(months / tireCycleMonths)
+  const taxCount = months > 0 ? Math.ceil(months / 12) : 0
+
+  const breakdown: MaintenanceBreakdownItem[] = [
+    createBreakdownItem(
+      'inspection',
+      '車検',
+      inspectionCost,
+      input.inspectionCycleLabel ??
+        (input.vehicleCondition === 'new' ? '初回3年後・以後2年ごと' : '次回指定・以後2年ごと'),
+      inspectionMonths.length,
+    ),
+    createBreakdownItem(
+      'legalInspection',
+      '法定12か月点検',
+      legalInspectionCost,
+      '1年ごと（車検月を除く）',
+      legalInspectionMonths.length,
+    ),
+    createBreakdownItem(
+      'sixMonthInspection',
+      '6か月点検',
+      sixMonthInspectionCost,
+      '6か月ごと（重複月を除く）',
+      sixMonthInspectionMonths.length,
+    ),
+    createBreakdownItem('tires', '夏・冬タイヤ', tireCost, `${tireCycleYears}年ごと`, tireCount),
+    createBreakdownItem('tax', '自動車税', annualTax, '年1回', taxCount),
+    createBreakdownItem(
+      'insurance',
+      '任意保険',
+      monthlyInsurance,
+      '毎月',
+      input.includeInsurance ? months : 0,
+    ),
+    createBreakdownItem('repair', '修理費用', repairCost, '任意入力', repairCost > 0 ? 1 : 0),
   ]
 
-  const byKey: Record<MaintenanceItemKey, number> = { ...EMPTY_BY_KEY }
-  for (const it of items) byKey[it.key] = it.total
+  const findTotal = (id: MaintenanceBreakdownItem['id']) =>
+    breakdown.find((item) => item.id === id)?.total ?? 0
 
-  const totalExcludingInsurance =
-    byKey.inspection +
-    byKey.legalInspection +
-    byKey.sixMonthInspection +
-    byKey.tax +
-    byKey.tires
-
-  const total = totalExcludingInsurance + insuranceTotal
-
-  return {
-    items,
-    total,
-    totalExcludingInsurance,
-    insuranceTotal,
-    insuranceEntered,
-    byKey,
+  const result: MaintenanceResult = {
+    months,
+    inspectionMonths,
+    legalInspectionMonths,
+    sixMonthInspectionMonths,
+    inspectionCost: findTotal('inspection'),
+    legalInspectionCost: findTotal('legalInspection'),
+    sixMonthInspectionCost: findTotal('sixMonthInspection'),
+    tireCost: findTotal('tires'),
+    taxCost: findTotal('tax'),
+    insuranceCost: findTotal('insurance'),
+    repairCost: findTotal('repair'),
+    total: breakdown.reduce((sum, item) => sum + item.total, 0),
+    breakdown,
+    warnings,
   }
+
+  return result
 }

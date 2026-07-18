@@ -1,164 +1,156 @@
-/**
- * おまとめプラン（純粋関数）。
- *
- * 表示名は必ず「おまとめプラン」。リース商品として説明しない。
- *
- * - 車両費用に「含める維持費」をまとめて分割する。
- * - 含めた維持費は分割（実質月額・実質総額）に内包し、別途維持費は二重計上しない。
- * - omatomeIncludedCost（含む）と omatomeExcludedCost（別途）を区分する。
- * - 任意保険は includeInsurance かつ入力済みのときのみ含める。
- */
-
-import type { PlanResult, Scenario } from './types'
-import type { MaintenanceItemKey } from './maintenance'
-import { PLAN_LABELS } from './constants'
-import { createBreakdown, effectiveMonthlyOf, type PlanContext } from './planHelpers'
-import { computeInstallment, resolveOfficialQuote } from './installment'
 import { normalizeYen } from './money'
+import { calculateScenarioMaintenance } from './maintenance'
+import { createPlanResult, getVehicleAmounts } from './planHelpers'
+import {
+  normalizePaymentCount,
+  normalizePurchaseMaintenanceYears,
+  OMATOME_PAYMENT_COUNTS,
+  paymentCountToYears,
+} from './planTerms'
+import type {
+  MaintenanceCoverage,
+  MaintenanceResult,
+  OmatomePlanResult,
+  PlanResult,
+  Scenario,
+} from './types'
 
-const ITEM_LABELS: Record<MaintenanceItemKey, string> = {
-  inspection: '車検',
-  legalInspection: '法定12か月点検',
-  sixMonthInspection: '6か月点検',
-  tires: '夏・冬タイヤ',
-  tax: '自動車税',
-  insurance: '任意保険',
+function createMaintenanceCoverage(
+  maintenance: MaintenanceResult,
+  coveredMaintenance: MaintenanceResult,
+  includeInsurance: boolean,
+): MaintenanceCoverage {
+  const coveredById = new Map(
+    coveredMaintenance.breakdown.map((item) => [item.id, item]),
+  )
+  const items = maintenance.breakdown.map((item) => {
+    const canBeIncluded = item.id !== 'repair'
+      && (item.id !== 'insurance' || includeInsurance)
+    const includedCost = canBeIncluded
+      ? Math.min(item.total, coveredById.get(item.id)?.total ?? 0)
+      : 0
+    return {
+      id: item.id,
+      includedCost,
+      customerCost: Math.max(0, item.total - includedCost),
+    }
+  })
+  return {
+    includedThroughMonths: coveredMaintenance.months,
+    includedCost: items.reduce((sum, item) => sum + item.includedCost, 0),
+    customerCost: items.reduce((sum, item) => sum + item.customerCost, 0),
+    items,
+  }
 }
 
-export function calculateOmatomePlan(scenario: Scenario, ctx: PlanContext): PlanResult {
-  const { estimate, maintenance, comparisonMonths } = ctx
+export function calculateOmatome(scenario: Scenario): OmatomePlanResult {
+  const vehicle = getVehicleAmounts(scenario, 'new')
   const input = scenario.omatome
-
-  // どの維持費を含めるか（二重計上防止のため byKey から1回だけ参照）。
-  const includeMap: Record<MaintenanceItemKey, boolean> = {
-    inspection: input.includeInspection,
-    legalInspection: input.includeLegalInspection,
-    sixMonthInspection: input.includeSixMonthInspection,
-    tires: input.includeTires,
-    tax: input.includeTax,
-    // 任意保険は入力済みのときのみ。
-    insurance: input.includeInsurance && maintenance.insuranceEntered,
-  }
-
-  const includedItems: string[] = []
-  const excludedItems: string[] = []
-  let omatomeIncludedCost = 0
-  let omatomeExcludedCost = 0
-  const keys: MaintenanceItemKey[] = [
-    'inspection',
-    'legalInspection',
-    'sixMonthInspection',
-    'tires',
-    'tax',
-    'insurance',
-  ]
-  for (const key of keys) {
-    const cost = maintenance.byKey[key]
-    if (includeMap[key]) {
-      omatomeIncludedCost += cost
-      includedItems.push(ITEM_LABELS[key])
-    } else {
-      omatomeExcludedCost += cost
-      excludedItems.push(ITEM_LABELS[key])
-    }
-  }
-
+  const paymentCount = normalizePaymentCount(
+    input.paymentCount,
+    OMATOME_PAYMENT_COUNTS,
+  )
+  const returnYears = paymentCountToYears(paymentCount)
+  const purchaseYears = normalizePurchaseMaintenanceYears(
+    input.omatomeMaintenanceYears,
+    returnYears,
+  )
+  const coveredMaintenance = calculateScenarioMaintenance(
+    scenario,
+    returnYears,
+    'new',
+  )
+  const bonusPaymentCount = Math.floor(paymentCount / 6)
   const downPayment = normalizeYen(input.downPayment)
-  // おまとめ対象 = 車両支払対象総額 + 含める維持費。
-  const financedBase = estimate.payableTotal + omatomeIncludedCost
-  const principal = Math.max(0, financedBase - downPayment)
-  const months = Math.max(0, Math.trunc(normalizeYen(input.months)))
+  const firstPayment = normalizeYen(input.firstPayment)
+  const monthlyPayment = normalizeYen(input.monthlyPayment)
+  const bonusPayment = normalizeYen(input.bonusPayment)
+  const finalPayment = normalizeYen(input.finalPayment)
+  const regularTotal =
+    paymentCount > 0
+      ? firstPayment + monthlyPayment * Math.max(0, paymentCount - 1)
+      : 0
+  const regularPaymentTotal =
+    downPayment +
+    regularTotal +
+    bonusPayment * bonusPaymentCount
+  const complete = vehicle.hasRequiredPrice
+    && regularPaymentTotal > 0
+    && paymentCount > 0
+    && finalPayment > 0
 
-  // 月額の直接上書き（正式見積転記用）。指定時はその月額で総額を再構成する。
-  const overrideMonthly =
-    typeof input.monthlyPayment === 'number' && input.monthlyPayment > 0
-      ? normalizeYen(input.monthlyPayment)
-      : null
-
-  // 正式見積（初回/2回目以降月額/回数）の手入力があれば最優先。
-  const official = resolveOfficialQuote(input.official)
-
-  let initialPayment: number
-  let equalMonthly: number
-  let installmentTotal: number
-  let interestFee: number
-  let paymentCount: number
-
-  if (official) {
-    initialPayment = official.initialPayment
-    equalMonthly = official.equalMonthly
-    installmentTotal = official.monthlyScheduleTotal
-    interestFee = Math.max(0, installmentTotal - principal)
-    paymentCount = official.paymentCount
-  } else if (overrideMonthly !== null && months > 0) {
-    equalMonthly = overrideMonthly
-    installmentTotal = overrideMonthly * months
-    initialPayment = overrideMonthly
-    interestFee = Math.max(0, installmentTotal - principal)
-    paymentCount = months
-  } else {
-    const inst = computeInstallment({
-      principal,
-      months,
-      annualRate: input.annualRate,
-      residual: 0,
-      includeResidualInTotal: true,
+  const createModeResult = (
+    mode: 'return' | 'purchase',
+    maintenance: MaintenanceResult,
+    maintenanceYears: number,
+  ): PlanResult => {
+    const coverage = createMaintenanceCoverage(
+      maintenance,
+      coveredMaintenance,
+      input.included.insurance,
+    )
+    const totalPayment = regularPaymentTotal + (mode === 'purchase' ? finalPayment : 0)
+    const effectiveTotal = totalPayment + coverage.customerCost
+    const includedIds = new Set(
+      coverage.items.filter((item) => item.includedCost > 0).map((item) => item.id),
+    )
+    const excludedIds = new Set(
+      coverage.items.filter((item) => item.customerCost > 0).map((item) => item.id),
+    )
+    return createPlanResult(scenario, maintenance, {
+      planId: 'omatome',
+      label: 'おまとめプラン',
+      isComplete: complete,
+      totalPayment,
+      effectiveTotal,
+      maintenanceYears,
+      selectedMode: mode,
+      maintenanceCoverage: coverage,
+      priceBasis: 'new',
+      priceBasisAmount: vehicle.vehiclePrice,
+      hasRequiredPrice: vehicle.hasRequiredPrice,
+      initialPayment: downPayment + firstPayment,
+      monthlyPayment,
+      secondAndLaterMonthlyPayment: monthlyPayment,
+      finalPayment: mode === 'purchase' ? finalPayment : 0,
+      bonusPayment,
+      bonusPaymentCount,
+      paymentCount,
+      includedItems: [
+        '車両購入費用',
+        ...maintenance.breakdown
+          .filter((item) => includedIds.has(item.id))
+          .map((item) => item.label),
+      ],
+      excludedItems: maintenance.breakdown
+        .filter((item) => excludedIds.has(item.id))
+        .map((item) => item.label),
+      warnings: complete
+        ? []
+        : ['実見積の支払額・支払回数・最終回支払を入力してください。'],
+      breakdown: {
+        vehiclePrice: vehicle.vehiclePrice,
+        tradeIn: vehicle.tradeIn,
+        principal: Math.max(0, vehicle.purchaseAmount - downPayment),
+        downPayment,
+        omatomeIncludedCost: coverage.includedCost,
+        omatomeExcludedCost: coverage.customerCost,
+        omatomeReflectedCost: coverage.customerCost,
+        totalPayment,
+        effectiveTotal,
+      },
     })
-    initialPayment = inst.initialPayment
-    equalMonthly = inst.equalMonthly
-    installmentTotal = inst.totalPayment
-    interestFee = inst.interestFee
-    paymentCount = months
   }
 
-  const totalPayment = downPayment + installmentTotal
-  // 実質総額 = おまとめ支払総額（含む維持費は内包済み）+ 別途維持費（二重計上しない）。
-  const effectiveTotal = totalPayment + omatomeExcludedCost
-  const effectiveMonthly = effectiveMonthlyOf(effectiveTotal, comparisonMonths)
-
-  const breakdown = createBreakdown({
-    vehiclePrice: scenario.vehiclePrice,
-    optionPrice: scenario.optionPrice,
-    taxAndFees: scenario.taxAndFees,
-    discount: scenario.discount,
-    tradeIn: estimate.tradeIn,
-    principal,
-    downPayment,
-    inspectionCost: maintenance.byKey.inspection,
-    legalInspectionCost: maintenance.byKey.legalInspection,
-    sixMonthInspectionCost: maintenance.byKey.sixMonthInspection,
-    tireCost: maintenance.byKey.tires,
-    taxCost: maintenance.byKey.tax,
-    insuranceCost: maintenance.byKey.insurance,
-    omatomeIncludedCost,
-    omatomeExcludedCost,
-    interestFee,
-    residualValue: 0,
-    totalPayment,
-    effectiveTotal,
-    effectiveMonthly,
-  })
+  const returnResult = createModeResult('return', coveredMaintenance, returnYears)
+  const purchaseMaintenance = calculateScenarioMaintenance(scenario, purchaseYears, 'new')
+  const purchaseResult = createModeResult('purchase', purchaseMaintenance, purchaseYears)
+  const selected = input.selectedMode === 'purchase' ? purchaseResult : returnResult
 
   return {
-    planId: 'omatome',
-    label: PLAN_LABELS.omatome,
-    isVisible: true,
-    isComplete: principal > 0 && (official ? true : months > 0),
-    totalPayment,
-    effectiveTotal,
-    effectiveMonthly,
-    initialPayment,
-    monthlyPayment: equalMonthly,
-    secondAndLaterMonthlyPayment: equalMonthly,
-    finalPayment: equalMonthly,
-    paymentCount,
-    bonusPayment: 0,
-    bonusPaymentCount: 0,
-    residualValue: 0,
-    interestFee,
-    includedItems,
-    excludedItems,
-    breakdown,
-    warnings: [],
+    ...selected,
+    selectedMode: input.selectedMode,
+    returnResult,
+    purchaseResult,
   }
 }
