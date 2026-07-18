@@ -185,16 +185,18 @@
   .comparison-table td {
     border-right: 0.45pt solid #d1d1d6;
     border-bottom: 0.45pt solid #d1d1d6;
-    padding: 1.25mm 1.1mm;
-    font-size: 8.25pt;
-    line-height: 1.15;
+    padding: 1.65mm 1.2mm;
+    font-size: 8.6pt;
+    line-height: 1.2;
   }
 
   .comparison-table thead th {
-    height: 18mm;
+    height: 22mm;
+    padding-block: 2mm;
     background: var(--print-accent-soft);
     color: var(--print-accent-strong);
     text-align: center;
+    vertical-align: middle;
   }
 
   .comparison-table thead th:first-child,
@@ -205,16 +207,20 @@
     text-align: left;
   }
 
-  .comparison-table thead th span {
+  .comparison-table thead th > span {
+    display: block;
     color: #000000;
-    font-size: 9.5pt;
+    font-size: 10pt;
+    line-height: 1.1;
   }
 
-  .comparison-table thead th small {
-    margin-top: 0.7mm;
+  .comparison-table thead th > small {
+    display: block;
+    margin-top: 0.8mm;
     color: #5f5f64;
-    font-size: 6.6pt;
-    line-height: 1.15;
+    font-size: 6.8pt;
+    line-height: 1.2;
+    white-space: normal;
   }
 
   .comparison-table .status-badge {
@@ -231,7 +237,7 @@
 
   .comparison-table td {
     color: #1d1d1f;
-    font-size: 8.5pt;
+    font-size: 9pt;
     font-weight: 700;
     text-align: right;
   }
@@ -250,16 +256,16 @@
   }
 
   .print-payment-table tr.print-emphasis-monthly td {
-    padding-top: 1.7mm;
-    padding-bottom: 1.7mm;
-    font-size: 12pt;
+    padding-top: 2.1mm;
+    padding-bottom: 2.1mm;
+    font-size: 13pt;
     font-weight: 850;
   }
 
   .print-payment-table tr.print-emphasis-total td {
-    padding-top: 1.8mm;
-    padding-bottom: 1.8mm;
-    font-size: 11.5pt;
+    padding-top: 2.1mm;
+    padding-bottom: 2.1mm;
+    font-size: 12.5pt;
     font-weight: 850;
   }
 

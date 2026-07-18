@@ -1,0 +1,431 @@
+.quick-results {
+  position: sticky;
+  top: 92px;
+  max-height: calc(100vh - 116px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  scrollbar-width: thin;
+}
+
+.quick-results__heading {
+  margin-top: 18px;
+}
+
+.quick-results__heading h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.03em;
+}
+
+.quick-results__heading > p:last-child {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.quick-results__list {
+  display: grid;
+  gap: 1px;
+  margin-top: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--line);
+}
+
+.quick-plan {
+  padding: 12px;
+  background: var(--surface);
+}
+
+.quick-plan__summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.quick-plan__title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.quick-plan h3 {
+  margin: 0;
+  font-size: 12px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 1px 6px;
+  color: var(--success);
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.status-badge.is-incomplete {
+  color: var(--danger);
+}
+
+.price-basis-label {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.quick-plan__amount {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.quick-plan__amount strong {
+  color: var(--ink-strong);
+  font-size: 18px;
+  letter-spacing: -0.04em;
+}
+
+.quick-plan__amount span {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.quick-plan__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.inline-warning {
+  margin: 7px 0 0;
+  color: var(--warning);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.screen-comparison-wrap,
+.comparison-table-wrap {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.screen-comparison-table,
+.comparison-table {
+  width: 100%;
+}
+
+.screen-comparison-table th,
+.screen-comparison-table td,
+.comparison-table th,
+.comparison-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 13px 12px;
+  font-size: 12px;
+  text-align: right;
+}
+
+.screen-comparison-table thead th,
+.comparison-table thead th {
+  background: var(--surface-subtle);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.screen-comparison-table th:first-child,
+.comparison-table th:first-child {
+  text-align: left;
+}
+
+.screen-comparison-table tbody th {
+  min-width: 142px;
+}
+
+.screen-comparison-table tbody th > span,
+.screen-comparison-table tbody th > small {
+  display: block;
+}
+
+.screen-comparison-table tbody th > small {
+  margin: 3px 0 6px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.screen-comparison-table .is-primary-number {
+  color: var(--ink-strong);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.screen-comparison-table tbody tr:last-child > *,
+.comparison-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.plan-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.plan-card {
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 16px;
+  background: var(--surface);
+}
+
+.plan-card > header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.plan-card h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.plan-card header span,
+.plan-card details,
+.plan-card dt {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.plan-card__primary {
+  display: grid;
+  gap: 3px;
+  margin-top: 14px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+}
+
+.plan-card__primary span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.plan-card__primary strong {
+  font-size: 25px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em;
+}
+
+.plan-card dl {
+  margin: 0;
+}
+
+.plan-card__totals,
+.plan-card__conditions,
+.plan-card__details {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px !important;
+}
+
+.plan-card dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.plan-card dd {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.plan-card details {
+  margin-top: 13px;
+  border-top: 1px solid var(--line);
+  padding-top: 11px;
+}
+
+.plan-card summary {
+  min-height: 36px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.effective-chart ul {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.effective-chart__item {
+  --plan-color: #8e8e93;
+  --plan-soft: color-mix(in srgb, var(--plan-color) 10%, var(--surface));
+  display: grid;
+  grid-template-columns: 150px minmax(120px, 1fr) 116px;
+  align-items: center;
+  gap: 14px;
+  border-left: 3px solid var(--plan-color);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--plan-soft);
+}
+
+.effective-chart__item--cash { --plan-color: #2c2c2e; }
+.effective-chart__item--credit { --plan-color: #64748b; }
+.effective-chart__item--bvc { --plan-color: #c2414d; }
+.effective-chart__item--omatome { --plan-color: #8f1d2c; }
+
+:root[data-theme="dark"] .effective-chart__item--cash { --plan-color: #d1d1d6; }
+:root[data-theme="dark"] .effective-chart__item--credit { --plan-color: #94a3b8; }
+
+.effective-chart__label {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 8px;
+}
+
+.effective-chart__label strong {
+  font-size: 12px;
+}
+
+.effective-chart__label span {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.effective-chart__tag {
+  border: 1px solid color-mix(in srgb, var(--plan-color) 45%, transparent);
+  border-radius: 999px;
+  padding: 2px 6px;
+  color: var(--plan-color);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.effective-chart__track {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--plan-color) 15%, var(--surface));
+}
+
+.effective-chart__bar {
+  display: block;
+  width: var(--bar-size);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--plan-color);
+}
+
+.effective-chart__value {
+  color: var(--ink-strong);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.maintenance-plan-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.maintenance-plan-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--surface-subtle);
+}
+
+.maintenance-plan-card h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.maintenance-plan-card > p {
+  margin: 3px 0 12px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.maintenance-plan-card dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--line);
+}
+
+.maintenance-plan-card dl > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 9px 10px;
+  background: var(--surface);
+}
+
+.maintenance-plan-card dt {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.maintenance-plan-card dd {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.empty-comparison {
+  margin: 16px 0 0;
+  border: 1px dashed var(--line-strong);
+  border-radius: 12px;
+  padding: 18px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.warning-list {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: var(--warning);
+  font-size: 10px;
+}
+
+.print-comparison,
+.print-plan-cards,
+.print-maintenance-details,
+.print-maintenance-cadence,
+.print-disclaimer {
+  display: none;
+}

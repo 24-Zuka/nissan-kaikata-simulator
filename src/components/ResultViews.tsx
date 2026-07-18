@@ -14,6 +14,7 @@ import {
   type ComparisonRowKey,
 } from './resultRows'
 import { InputProgress } from './InputProgress'
+import type { InputStageId } from '../features/detail-input/inputFlow'
 
 function formatResultValue(plan: PlanResult, key: ComparisonRowKey) {
   if (!plan.isComplete) return '要入力'
@@ -93,12 +94,28 @@ export function CompletionBadge({ plan }: { plan: PlanResult }) {
   )
 }
 
-export function QuickResults({ result }: { result: ComparisonResult }) {
+export function QuickResults({
+  result,
+  activeStage = 'dealVehicle',
+  onStageChange = () => undefined,
+  showProgress = true,
+}: {
+  result: ComparisonResult
+  activeStage?: InputStageId
+  onStageChange?: (stageId: InputStageId) => void
+  showProgress?: boolean
+}) {
   const plans = result.plans.filter((plan) => plan.isVisible)
 
   return (
     <aside className="quick-results" aria-label="比較結果の簡易確認">
-      <InputProgress result={result} />
+      {showProgress && (
+        <InputProgress
+          result={result}
+          activeStage={activeStage}
+          onStageChange={onStageChange}
+        />
+      )}
       <div className="quick-results__heading">
         <p className="eyebrow">簡易確認</p>
         <h2>比較結果</h2>

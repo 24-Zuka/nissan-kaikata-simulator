@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   checkSession,
   clearAuthMarker,
@@ -118,6 +118,7 @@ export default function App({ externalAuth }: AppProps = {}) {
   const [migrationDismissed, setMigrationDismissed] = useState(false)
   const [syncConflictId, setSyncConflictId] = useState('')
   const [theme, setTheme] = useState<ThemePreference>(getInitialTheme)
+  const inputScrollPosition = useRef(0)
   const result = useMemo(() => calculateComparison(scenario), [scenario])
   const scenarioSnapshot = useMemo(() => JSON.stringify(scenario), [scenario])
   const hasUnsavedChanges = scenarioSnapshot !== savedSnapshot
@@ -141,6 +142,18 @@ export default function App({ externalAuth }: AppProps = {}) {
     }
     return [...merged.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
   }, [cloudSummaries, savedScenarios])
+
+  const changeMode = useCallback((nextMode: Mode) => {
+    if (nextMode === mode) return
+    if (mode === 'input') inputScrollPosition.current = window.scrollY
+    setMode(nextMode)
+    window.requestAnimationFrame(() => {
+      window.scrollTo({
+        top: nextMode === 'presentation' ? 0 : inputScrollPosition.current,
+        behavior: 'auto',
+      })
+    })
+  }, [mode])
 
   useEffect(() => {
     if (!hasUnsavedChanges) return
@@ -457,13 +470,13 @@ export default function App({ externalAuth }: AppProps = {}) {
 
   const handlePrint = () => {
     if (result.incompletePlans.length > 0 || result.completePlans.length === 0) {
-      setMode('input')
+      changeMode('input')
       setMessage(
         `印刷できません。選択中の未完成プランを入力するか、比較対象から外してください（${result.incompletePlans.length}件）。`,
       )
       return
     }
-    setMode('presentation')
+    changeMode('presentation')
     window.setTimeout(() => window.print(), 100)
   }
 
@@ -500,49 +513,58 @@ export default function App({ externalAuth }: AppProps = {}) {
 
   return (
     <div className="app-shell">
-      <header className="app-header">
+      <header className={`app-header${mode === 'presentation' ? ' app-header--presentation' : ''}`}>
         <div className="brand">
           <BrandMark />
           <div>
             <strong>Car Plan Advisor</strong>
-            <span>Sales Support Tool</span>
+            <span>{mode === 'presentation' ? 'Customer Presentation' : 'Sales Support Tool'}</span>
           </div>
         </div>
 
-        <nav className="mode-nav" aria-label="表示モード">
-          <button className={mode === 'input' ? 'is-active' : ''} onClick={() => setMode('input')} type="button">詳細入力</button>
-          <button className={mode === 'presentation' ? 'is-active' : ''} onClick={() => setMode('presentation')} type="button">お客様説明</button>
-        </nav>
-
-        <ThemeToggle value={theme} onChange={handleThemeChange} />
-
-        <div className="header-actions">
-          {externalAuth && (
-            <span className="user-chip" title={externalAuth.organizationName}>
-              {externalAuth.displayName}・{externalAuth.role === 'admin' ? '管理者' : '担当者'}
-            </span>
-          )}
-          <span className={`sync-status sync-status--${syncState}`}>{syncLabel}</span>
-          <button className="button button--quiet" onClick={handleShare} type="button">共有データ</button>
-          <button className="button button--quiet" onClick={handlePrint} type="button">印刷</button>
-          <button className="button button--quiet" onClick={() => void confirmLogout()} type="button">ログアウト</button>
-          <button className="button button--primary" onClick={handleSave} type="button">保存</button>
-        </div>
-        <div className="mobile-header-actions">
-          <span className={`sync-status sync-status--${syncState}`}>{syncLabel}</span>
-          <button className="button button--primary" onClick={handleSave} type="button">保存</button>
-          <details>
-            <summary className="button button--quiet">その他</summary>
-            <div>
-              <button onClick={handleShare} type="button">共有データ</button>
-              <button onClick={handlePrint} type="button">印刷</button>
-              <button disabled={syncState === 'syncing'} onClick={() => void synchronize()} type="button">再同期</button>
-              <button onClick={() => void confirmLogout()} type="button">ログアウト</button>
+        {mode === 'input' ? (
+          <>
+            <nav className="mode-nav" aria-label="表示モード">
+              <button className="is-active" onClick={() => changeMode('input')} type="button">詳細入力</button>
+              <button onClick={() => changeMode('presentation')} type="button">お客様説明</button>
+            </nav>
+            <ThemeToggle value={theme} onChange={handleThemeChange} />
+            <div className="header-actions">
+              {externalAuth && (
+                <span className="user-chip" title={externalAuth.organizationName}>
+                  {externalAuth.displayName}・{externalAuth.role === 'admin' ? '管理者' : '担当者'}
+                </span>
+              )}
+              <span className={`sync-status sync-status--${syncState}`}>{syncLabel}</span>
+              <button className="button button--quiet" onClick={handleShare} type="button">共有</button>
+              <button className="button button--quiet" onClick={handlePrint} type="button">印刷</button>
+              <button className="button button--quiet" onClick={() => void confirmLogout()} type="button">ログアウト</button>
+              <button className="button button--primary" onClick={handleSave} type="button">保存</button>
             </div>
-          </details>
-        </div>
+            <div className="mobile-header-actions">
+              <span className={`sync-status sync-status--${syncState}`}>{syncLabel}</span>
+              <button className="button button--primary" onClick={handleSave} type="button">保存</button>
+              <details>
+                <summary className="button button--quiet">その他</summary>
+                <div>
+                  <button onClick={handleShare} type="button">共有</button>
+                  <button onClick={handlePrint} type="button">印刷</button>
+                  <button disabled={syncState === 'syncing'} onClick={() => void synchronize()} type="button">再同期</button>
+                  <button onClick={() => void confirmLogout()} type="button">ログアウト</button>
+                </div>
+              </details>
+            </div>
+          </>
+        ) : (
+          <div className="presentation-header-actions">
+            <ThemeToggle value={theme} onChange={handleThemeChange} />
+            <button className="button button--quiet" onClick={() => changeMode('input')} type="button">入力へ戻る</button>
+            <button className="button button--primary" onClick={handlePrint} type="button">印刷</button>
+          </div>
+        )}
       </header>
 
+      {mode === 'input' && <>
       <section className="scenario-bar" aria-label="保存済み見積">
         <label>
           <span>全端末共通の保存済み見積</span>
@@ -641,12 +663,17 @@ export default function App({ externalAuth }: AppProps = {}) {
           <button type="button" onClick={() => setShareUrl('')}>閉じる</button>
         </div>
       )}
+      </>}
 
       <Suspense fallback={<div className="screen-loading" role="status">画面を読み込んでいます…</div>}>
         {mode === 'input' ? (
           <DetailInputScreen scenario={scenario} result={result} onChange={setScenario} />
         ) : (
-          <CustomerPresentation scenario={scenario} result={result} />
+          <CustomerPresentation
+            scenario={scenario}
+            result={result}
+            onEdit={() => changeMode('input')}
+          />
         )}
       </Suspense>
     </div>

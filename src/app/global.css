@@ -28,10 +28,20 @@
   --success-soft: #e6f4ec;
   --warning: #9a6b00;
   --warning-soft: #fdf2dc;
+  --danger: #c3002f;
+  --danger-soft: #fff1f3;
   --glass: rgb(255 255 255 / 82%);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 4%), 0 8px 28px rgb(0 0 0 / 3%);
   --radius-input: 10px;
   --radius-card: 18px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --content-max: 1120px;
   color-scheme: light;
 }
 
@@ -59,6 +69,8 @@
   --success-soft: rgb(48 209 88 / 14%);
   --warning: #ffd60a;
   --warning-soft: rgb(255 214 10 / 14%);
+  --danger: #ff6961;
+  --danger-soft: rgb(255 69 58 / 14%);
   --glass: rgb(28 28 30 / 84%);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 34%);
   color-scheme: dark;
@@ -128,7 +140,7 @@ input::placeholder {
   color: var(--muted-light);
 }
 
-input[type="number"] {
+.input-with-suffix input {
   font-variant-numeric: tabular-nums;
   text-align: right;
 }

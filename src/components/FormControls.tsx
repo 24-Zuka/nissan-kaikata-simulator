@@ -3,6 +3,7 @@ import type {
   ReactNode,
   SelectHTMLAttributes,
 } from 'react'
+import { useState } from 'react'
 
 type FieldProps = {
   label: string
@@ -67,8 +68,18 @@ export function NumberField({
   id,
   min = 0,
   step = 1,
+  onBlur,
+  onFocus,
   ...props
 }: NumberFieldProps) {
+  const [focused, setFocused] = useState(false)
+  const useGrouping = suffix.includes('円')
+  const displayValue = value === ''
+    ? ''
+    : focused || !useGrouping
+      ? String(value)
+      : Number(value).toLocaleString('ja-JP', { maximumFractionDigits: 20 })
+
   return (
     <Field label={label} hint={hint} error={error} inputId={id} required={required}>
       <span className="input-with-suffix">
@@ -79,15 +90,29 @@ export function NumberField({
           aria-describedby={error ? `${id}-error` : hint && id ? `${id}-hint` : undefined}
           aria-invalid={error ? true : undefined}
           aria-required={required || undefined}
-          type="number"
-          inputMode="numeric"
-          min={min}
-          step={step}
+          type="text"
+          inputMode={String(step).includes('.') ? 'decimal' : 'numeric'}
+          data-min={min}
+          data-step={step}
           required={required}
-          value={value}
-          onChange={(event) =>
-            onValueChange(event.target.value === '' ? '' : Number(event.target.value))
-          }
+          value={displayValue}
+          onFocus={(event) => {
+            setFocused(true)
+            onFocus?.(event)
+          }}
+          onBlur={(event) => {
+            setFocused(false)
+            onBlur?.(event)
+          }}
+          onChange={(event) => {
+            const normalized = event.target.value.replaceAll(',', '').trim()
+            if (normalized === '') {
+              onValueChange('')
+              return
+            }
+            const nextValue = Number(normalized)
+            if (Number.isFinite(nextValue)) onValueChange(nextValue)
+          }}
         />
         {suffix && <span>{suffix}</span>}
       </span>

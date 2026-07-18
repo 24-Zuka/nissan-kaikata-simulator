@@ -8,6 +8,8 @@
 - 初度登録年月を基準にした現在車の車検回数計算
 - BVC／おまとめの返却・買取と期間超過維持費
 - 比較対象プランの選択、入力進捗、未入力箇所へのジャンプ
+- 商談・車両、比較対象、維持費、支払条件の4段階入力
+- PCの追従比較、iPad／スマホの固定操作バー
 - 未完成プランの部分金額を隠す誤認防止表示
 - お客様説明、実質総額チャート、A4横2ページ印刷
 - 端末内保存、オフライン同期キュー、競合解決
@@ -31,12 +33,13 @@ Clerk変数がない場合は移行期間用の固定パスワード認証を使
 npm run typecheck
 npm run lint
 npm test
+npm run test:e2e
 npm run build
 npm run check:forbidden
 npm run check:secrets
 ```
 
-Vitestは専用の`vitest.config.ts`でPWA生成を外し、単一ワーカーで安定実行します。Lintは生成物・監査資料・Vercel成果物を対象外にしています。
+Vitestは専用の`vitest.config.ts`でPWA生成を外し、単一ワーカーで安定実行します。PlaywrightはPC・390px・説明準備状態・5プラン印刷を検証します。Lintは生成物・監査資料・Vercel成果物を対象外にしています。
 
 ## 計算上の要点
 
