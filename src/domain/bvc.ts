@@ -1,126 +1,163 @@
-/**
- * BVC（ビッグバリュークレジット＝残価据置型クレジット）（純粋関数）。
- *
- * 重要:
- * - 残価は最終回支払額として据え置く。
- * - 利息は残価を含む元金全体に対して発生する（「車両価格−残価」だけに利息をかけない）。
- *   computeInstallment は残価の現在価値のみ月額按分から外し、残価分の利息は支払総額に内包する。
- * - 買取時: 最終回に残価を支払う → 支払総額に残価を含める。
- * - 返却時: 最終回支払（残価）が発生しない → 支払総額に残価を含めない。
- * - 返却・買取の差額が残価相当になる。
- */
+import { normalizeYen } from './money'
+import {
+  calculateManualPaymentSchedule,
+  calculatePaymentSchedule,
+  hasManualPaymentInput,
+} from './payment'
+import { calculateScenarioMaintenance } from './maintenance'
+import { createPlanResult, getVehicleAmounts } from './planHelpers'
+import {
+  BVC_PAYMENT_COUNTS,
+  normalizePaymentCount,
+  normalizePurchaseMaintenanceYears,
+  paymentCountToYears,
+} from './planTerms'
+import type {
+  BvcPlanResult,
+  MaintenanceResult,
+  PlanResult,
+  Scenario,
+} from './types'
 
-import type { BvcInput, PlanResult, Scenario } from './types'
-import { PLAN_LABELS } from './constants'
-import { createBreakdown, effectiveMonthlyOf, type PlanContext } from './planHelpers'
-import { computeInstallment, resolveOfficialQuote } from './installment'
-import { clampYen, normalizeYen, roundYen, Decimal } from './money'
-
-export function calculateBvcPlan(
-  scenario: Scenario,
-  ctx: PlanContext,
-  modeOverride?: BvcInput['mode'],
-): PlanResult {
-  const { estimate, maintenance, comparisonMonths } = ctx
-  const input = scenario.bvc
-  const mode = modeOverride ?? input.mode
-
-  const downPayment = normalizeYen(input.downPayment)
-  const principal = Math.max(0, estimate.payableTotal - downPayment)
-  // 残価: 明示の residualValue を優先。未入力(0)かつ概算残価率があれば 見積総額×率 で導出。
-  const rate = Math.max(0, input.residualRate ?? 0)
-  const residualFromRate =
-    rate > 0 ? roundYen(new Decimal(estimate.grossTotal).mul(rate).div(100)) : 0
-  const residualRaw = normalizeYen(input.residualValue) > 0 ? input.residualValue : residualFromRate
-  // 残価は 0〜元金 にクランプ（残価が元金を超えないように）。
-  const residual = clampYen(residualRaw, 0, principal)
-
-  const isPurchase = mode === 'purchase'
-
-  const inst = computeInstallment({
-    principal,
-    months: input.months,
-    annualRate: input.annualRate,
-    residual,
-    includeResidualInTotal: isPurchase,
-    bonusPayment: input.bonusPayment,
-    bonusMonths: input.bonusMonths,
-  })
-
-  // 正式見積（手入力）があれば月々の支払系列を手入力値で置き換える（残価の据置は維持）。
-  const official = resolveOfficialQuote(input.official)
-  const initialPayment = official ? official.initialPayment : inst.initialPayment
-  const equalMonthly = official ? official.equalMonthly : inst.equalMonthly
-  const paymentCount = official ? official.paymentCount : inst.monthlyCount
-  const monthlyScheduleTotal = official ? official.monthlyScheduleTotal : inst.monthlyScheduleTotal
-  const residualPaid = isPurchase ? residual : 0
-  const installmentTotal = official ? monthlyScheduleTotal + residualPaid : inst.totalPayment
-  const interestFee = official
-    ? Math.max(0, monthlyScheduleTotal + residual - principal)
-    : inst.interestFee
-
-  const totalPayment = downPayment + installmentTotal
-  const effectiveTotal = totalPayment + maintenance.total
-  const effectiveMonthly = effectiveMonthlyOf(effectiveTotal, comparisonMonths)
-
-  const breakdown = createBreakdown({
-    vehiclePrice: scenario.vehiclePrice,
-    optionPrice: scenario.optionPrice,
-    taxAndFees: scenario.taxAndFees,
-    discount: scenario.discount,
-    tradeIn: estimate.tradeIn,
-    principal,
-    downPayment,
-    inspectionCost: maintenance.byKey.inspection,
-    legalInspectionCost: maintenance.byKey.legalInspection,
-    sixMonthInspectionCost: maintenance.byKey.sixMonthInspection,
-    tireCost: maintenance.byKey.tires,
-    taxCost: maintenance.byKey.tax,
-    insuranceCost: maintenance.byKey.insurance,
-    omatomeExcludedCost: maintenance.total,
-    interestFee,
-    residualValue: residual,
-    totalPayment,
-    effectiveTotal,
-    effectiveMonthly,
-  })
-
+function limitReturnInspection(maintenance: MaintenanceResult): MaintenanceResult {
+  const inspection = maintenance.breakdown.find((item) => item.id === 'inspection')!
+  if (inspection.count <= 1) return maintenance
+  const inspectionTotal = inspection.unitCost
+  const breakdown = maintenance.breakdown.map((item) => item.id === 'inspection'
+    ? { ...item, count: 1, total: inspectionTotal }
+    : item)
   return {
-    planId: 'bvc',
-    label: PLAN_LABELS.bvc,
-    isVisible: true,
-    isComplete: principal > 0 && (official ? true : normalizeYen(input.months) > 0),
-    totalPayment,
-    effectiveTotal,
-    effectiveMonthly,
-    initialPayment,
-    monthlyPayment: equalMonthly,
-    secondAndLaterMonthlyPayment: equalMonthly,
-    // 最終回支払額 = 残価（買取時は支払う、返却時は支払わない）。
-    finalPayment: isPurchase ? residual : 0,
-    paymentCount,
-    bonusPayment: official ? 0 : inst.bonusPayment,
-    bonusPaymentCount: official ? 0 : inst.bonusCount,
-    residualValue: residual,
-    interestFee,
-    includedItems: [],
-    excludedItems: ['車検', '法定12か月点検', '6か月点検', '夏・冬タイヤ', '自動車税', '任意保険'],
+    ...maintenance,
+    inspectionMonths: maintenance.inspectionMonths.slice(0, 1),
+    inspectionCost: inspectionTotal,
+    total: breakdown.reduce((sum, item) => sum + item.total, 0),
     breakdown,
-    warnings:
-      residual > 0
-        ? ['残価が最終回に据え置かれます。月額だけでなく最終回支払（残価）も含めてご確認ください。']
-        : [],
   }
 }
 
-/** 返却・買取の両方を計算して返す（お客様説明モードの比較用）。 */
-export function calculateBvcBoth(
-  scenario: Scenario,
-  ctx: PlanContext,
-): { return: PlanResult; purchase: PlanResult; residualDiff: number } {
-  const ret = calculateBvcPlan(scenario, ctx, 'return')
-  const buy = calculateBvcPlan(scenario, ctx, 'purchase')
-  // 差額は残価相当になるはず（検証可能）。
-  const residualDiff = Math.max(0, buy.totalPayment - ret.totalPayment)
-  return { return: ret, purchase: buy, residualDiff }
+export function calculateBvc(scenario: Scenario): BvcPlanResult {
+  const vehicle = getVehicleAmounts(scenario, 'new')
+  const paymentCount = normalizePaymentCount(
+    scenario.bvc.paymentCount,
+    BVC_PAYMENT_COUNTS,
+  )
+  const returnYears = paymentCountToYears(paymentCount)
+  const purchaseYears = normalizePurchaseMaintenanceYears(
+    scenario.bvc.bvcMaintenanceYears,
+    returnYears,
+  )
+  const returnMaintenance = limitReturnInspection(calculateScenarioMaintenance(
+    scenario,
+    returnYears,
+    'new',
+  ))
+  const purchaseMaintenance = calculateScenarioMaintenance(scenario, purchaseYears, 'new')
+  const downPayment = Math.min(
+    normalizeYen(scenario.bvc.downPayment),
+    vehicle.purchaseAmount,
+  )
+  const principal = Math.max(0, vehicle.purchaseAmount - downPayment)
+  const residualValue = Math.min(normalizeYen(scenario.bvc.residualValue), principal)
+  const regularPaymentCount = Math.max(0, paymentCount - 1)
+  const manualPayment = hasManualPaymentInput(
+    scenario.bvc.firstPayment,
+    scenario.bvc.monthlyPayment,
+  )
+  const scheduleInput = {
+    principal,
+    annualRate: scenario.bvc.annualRate,
+    paymentCount,
+    regularPaymentCount,
+    bonusPayment: scenario.bvc.bonusPayment,
+    residualValue,
+  }
+  const schedule = manualPayment
+    ? calculateManualPaymentSchedule({
+        ...scheduleInput,
+        firstPayment: scenario.bvc.firstPayment,
+        monthlyPayment: scenario.bvc.monthlyPayment,
+      })
+    : calculatePaymentSchedule(scheduleInput)
+  const installmentsWithoutResidual = Math.max(0, schedule.totalPayment - residualValue)
+  const returnTotal = downPayment + installmentsWithoutResidual
+  const purchaseTotal = downPayment + schedule.totalPayment
+  const complete =
+    vehicle.hasRequiredPrice &&
+    paymentCount > 1 &&
+    residualValue > 0 &&
+    (manualPayment
+      ? scenario.bvc.monthlyPayment !== '' && schedule.totalPayment >= principal
+      : scenario.bvc.annualRate !== '')
+  const commonWarnings = [
+    ...(complete ? [] : [manualPayment
+      ? '車両価格・入力支払額・支払回数・残価を確認してください。'
+      : '車両価格・金利・支払回数・残価を確認してください。']),
+    ...schedule.warnings,
+  ]
+
+  const createModeResult = (
+    mode: 'return' | 'purchase',
+    totalPayment: number,
+    maintenance: MaintenanceResult,
+    maintenanceYears: number,
+  ): PlanResult =>
+    createPlanResult(scenario, maintenance, {
+      planId: 'bvc',
+      label: 'BVC',
+      isComplete: complete,
+      totalPayment,
+      effectiveTotal: totalPayment + maintenance.total,
+      maintenanceYears,
+      selectedMode: mode,
+      priceBasis: 'new',
+      priceBasisAmount: vehicle.vehiclePrice,
+      hasRequiredPrice: vehicle.hasRequiredPrice,
+      initialPayment: downPayment + schedule.firstPayment,
+      monthlyPayment: schedule.secondAndLaterMonthlyPayment,
+      secondAndLaterMonthlyPayment: schedule.secondAndLaterMonthlyPayment,
+      finalPayment: mode === 'purchase' ? residualValue : 0,
+      bonusPayment: schedule.bonusPayment,
+      bonusPaymentCount: schedule.bonusPaymentCount,
+      paymentCount,
+      residualValue,
+      interestFee: schedule.interestFee,
+      includedItems: ['車両購入費用', '金利手数料'],
+      excludedItems: [
+        '維持費',
+        ...(mode === 'return' ? ['返却時の最終回支払'] : []),
+      ],
+      warnings: commonWarnings,
+      breakdown: {
+        vehiclePrice: vehicle.vehiclePrice,
+        tradeIn: vehicle.tradeIn,
+        principal,
+        downPayment,
+        interestFee: schedule.interestFee,
+        residualValue,
+        totalPayment,
+        effectiveTotal: totalPayment + maintenance.total,
+      },
+    })
+
+  const returnResult = createModeResult(
+    'return',
+    returnTotal,
+    returnMaintenance,
+    returnYears,
+  )
+  const purchaseResult = createModeResult(
+    'purchase',
+    purchaseTotal,
+    purchaseMaintenance,
+    purchaseYears,
+  )
+  const selected =
+    scenario.bvc.selectedMode === 'purchase' ? purchaseResult : returnResult
+
+  return {
+    ...selected,
+    selectedMode: scenario.bvc.selectedMode,
+    returnResult,
+    purchaseResult,
+  }
 }

@@ -1,0 +1,17 @@
+work/
+outputs/
+coverage/
+.DS_Store
+*.tsbuildinfo
+.env*
+!.env.example
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.csr
+*.p12
+*.pfx
+*.jks
+*.keystore

@@ -1,22 +1,47 @@
-/// <reference types="vitest/config" />
-import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vitest/config'
+import { VitePWA } from 'vite-plugin-pwa'
 
-// @types/node を追加せずに base を環境変数で切替可能にするための最小宣言。
-declare const process: { env: Record<string, string | undefined> }
-
-// base は GitHub Pages 等のサブパス公開に対応するため環境変数で切替可能にする。
-// 例: GitHub Pages なら VITE_BASE=/<repo-name>/ を指定。未指定なら '/' (Vercel/Netlify向け)。
-const base = process.env.VITE_BASE ?? '/'
-
-// https://vitejs.dev/config/
 export default defineConfig({
-  base,
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'prompt',
+      includeAssets: ['app-icon.svg', 'pwa-192x192.png', 'pwa-512x512.png'],
+      manifest: {
+        id: '/',
+        name: 'Car Plan Advisor',
+        short_name: 'Car Plan',
+        description: '購入方法と維持費を比較する商談支援ツール',
+        lang: 'ja',
+        start_url: '/',
+        scope: '/',
+        display: 'standalone',
+        background_color: '#F5F5F7',
+        theme_color: '#E60012',
+        icons: [
+          { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/app-icon.svg', sizes: 'any', type: 'image/svg+xml' },
+        ],
+      },
+      workbox: {
+        cleanupOutdatedCaches: true,
+        globPatterns: ['**/*.{html,js,css,svg,png,ico,woff2}'],
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            handler: 'NetworkOnly',
+          },
+        ],
+      },
+    }),
+  ],
   test: {
-    globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    css: false,
+    setupFiles: './src/test/setup.ts',
+    css: true,
   },
 })

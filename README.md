@@ -1,84 +1,113 @@
-# 日産 購入方法比較シミュレーター
+# Car Plan Advisor
 
-日産系ディーラーの営業担当者が商談中にお客様の目の前で使う、購入方法比較の業務支援Webアプリです。
-5プラン（**現状維持 / 現金一括 / クレジット / BVC / おまとめプラン**）を同じ条件で比較し、
-月々の支払額だけでなく、車両代・維持費・保険・車検・点検・夏冬タイヤ・将来支払まで含めた
-「実質負担」を分かりやすく説明できます。
-
-> リース商品としての表示・説明は行いません。表示名は一貫して「おまとめプラン」です。
-
-## 技術構成
-
-- React + TypeScript + Vite
-- Decimal.js（金額計算）
-- Vitest + React Testing Library（テスト）
-- ESLint + Prettier
-
-計算ロジックは `src/domain/` の純粋関数に集約し、UI（画面・印刷・お客様説明モード）は
-同一の計算結果オブジェクトを表示するだけです（表示側での再計算・再丸めはしません）。
-
-## セットアップ
-
-```bash
-npm install
-npm run dev        # 開発サーバー
-npm run build      # 本番ビルド（dist/）
-npm run preview    # ビルド結果のプレビュー
-npm test           # テスト
-npm run typecheck  # 型チェック
-npm run lint       # Lint
-```
+自動車商談で、現状維持・現金一括・クレジット・BVC・おまとめプランの支払額と維持費を比較するReact/Vite PWAです。
 
 ## 主な機能
 
-- 詳細入力画面（入力フォーム中心）
-- A/B/C 最大3パターンの比較（追加・複製・削除・切替。各パターンは独立した見積条件を持つ）
-- 正式見積（手入力）モード（クレジット/BVC/おまとめ。NFS支払予定表の初回・2回目以降月額・回数を転記して優先表示）
-- ボーナス加算月の複数選択、契約年数プリセット（BVC 3/4/5年・おまとめ 3/5/7年）、BVC概算残価率
-- お客様説明モード（5プラン比較表・BVC返却/買取・おまとめ概要・維持費用内訳・現状維持との差額）
-- 印刷（A4横1枚 / 上段=比較表・下段=維持費用内訳。QRなし・作成日1箇所）
-- ローカル保存（localStorage）/ JSON書き出し・読み込み / 共有リンク（既定で個人情報を除外）
+- 新車・中古車・現在車で分離した維持費計算
+- 初度登録年月を基準にした現在車の車検回数計算
+- BVC／おまとめの返却・買取と期間超過維持費
+- 比較対象プランの選択、入力進捗、未入力箇所へのジャンプ
+- 商談・車両、比較対象、維持費、支払条件の4段階入力
+- PCの追従比較、iPad／スマホの固定操作バー
+- 未完成プランの部分金額を隠す誤認防止表示
+- お客様説明、実質総額チャート、A4横2ページ印刷
+- 端末内保存、オフライン同期キュー、競合解決
+- Clerk Organizationによる店舗・担当者単位のアクセス制御
+- Upstash Redisのクラウド見積、検索、50件ページング
+- 個人名を除外した共有URL
+- ライト／ダークテーマ、PWA更新通知、オフラインアプリシェル
 
-## 外部公開
+## ローカル起動
 
-SPAとしてどの端末でもURLでアクセスできます。以下のいずれかで公開できます。
-
-### Vercel
-- リポジトリを連携 → ビルド設定は `vercel.json` を自動利用（rewrite設定済み）。
-
-### Netlify
-- リポジトリを連携 → `netlify.toml`（および `public/_redirects`）でSPA rewrite済み。
-
-### GitHub Pages
-- リポジトリ Settings > Pages > Source を「GitHub Actions」に設定。
-- `main` へ push すると `.github/workflows/deploy.yml` が `VITE_BASE=/<repo>/` でビルドし公開。
-- 公開URL: `https://<user>.github.io/<repo>/`
-
-### 手動（任意の静的ホスティング）
 ```bash
-npm run build       # ルート公開
-# サブパス公開時:
-# VITE_BASE=/<repo>/ npm run build   （PowerShell: $env:VITE_BASE="/<repo>/"; npm run build）
+npm install
+npm run dev
 ```
-`dist/` を配信してください。直接URLアクセス対応のため、配信側で全パスを `index.html` に
-フォールバックさせてください（上記設定ファイルで対応済み）。
 
-## NFS（日産フィナンシャルサービス）突合について
+Clerk変数がない場合は移行期間用の固定パスワード認証を使います。Clerkを確認する場合は`.env.example`を基に`.env.local`を作成してください。実値はコミットしません。
 
-クレジット/BVCの月額・支払総額は、NFSの支払予定表との1円単位一致を最終目標としています。
-実データ取得後、`src/domain/money.ts` の `ROUNDING_CONFIG` を校正し、
-`src/test/fixtures/nfs-golden.ts` に支払予定表の実値を転記してください。
-実値が未転記の間、ゴールデンテストは skip されます。
+## 品質確認
 
-## ディレクトリ
-
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run test:e2e
+npm run build
+npm run check:forbidden
+npm run check:secrets
 ```
-src/
-  app/            App.tsx / App.css
-  components/     layout / forms / comparison / plans / print / presentation / common
-  domain/         money / types / constants / estimate / installment / maintenance /
-                  statusQuo / cash / credit / bvc / omatome / visibility / scenario
-  hooks/          useScenarioState / useStatusQuoVisibility
-  utils/          format / storage / share
-  test/           fixtures(nfs-golden) / helpers
+
+Vitestは専用の`vitest.config.ts`でPWA生成を外し、単一ワーカーで安定実行します。PlaywrightはPC・390px・説明準備状態・5プラン印刷を検証します。Lintは生成物・監査資料・Vercel成果物を対象外にしています。
+
+## 計算上の要点
+
+- 維持期間はプラン別に1〜20年で設定します。
+- 新車の車検は初度登録36か月目、以後24か月ごとです。維持終了月と同じ月の車検は計上しません。
+- 現在車は初度登録年月と現在年月から車齢を求め、現在月の車検は計上し、維持終了月の車検は除外します。
+- 法定12か月点検・6か月点検は車検と同じ月に重複計上しません。
+- 現在車、新車、中古車の維持費条件は別々に保持します。
+- 中古車選択時、現金・クレジットは中古車価格と中古車維持費を使います。BVC・おまとめは新車価格と新車維持費を使います。
+- おまとめは車検・点検・タイヤ・税を支払期間内のリース料込みとし、任意保険は選択式、修理費は別途負担です。
+- 現状維持の実質月額は、これからの月払いまたは残債月割りと、これからの維持費月額で算出します。実質総額は累計比較値を維持します。
+
+## 保存スキーマv11
+
+- `comparison.enabledPlans`で購入4プランの表示可否を保存します。
+- v2〜v10、旧共有URL、旧クラウド見積は読込時にv11へ正規化します。
+- 旧`cash.enabled`は移行時だけ参照し、新規保存には残しません。
+- ローカル見積・同期キュー・移行済み状態は`organizationId`と`userId`単位で分離します。
+- 共有URLは`#share=`形式で、顧客名と担当者名を除外します。
+
+## 認証と権限
+
+本番切替後はClerkを正とします。
+
+- 公開登録はClerk Dashboardで無効化し、管理者のメール招待だけを許可します。
+- Clerk Organizationを店舗として扱います。
+- `org:member`は本人所有の見積だけを操作できます。
+- `org:admin`は組織内全見積、未割当旧見積、担当者割当を操作できます。
+- APIはOrganizationとユーザーを認証トークンから決定し、クライアントの所有者指定を信用しません。
+- 旧固定パスワードAPIはClerk本番確認まで残し、確認後に別工程で削除します。
+
+## クラウド同期
+
+- 一覧APIは50件単位の概要だけを返し、見積本文は選択時に取得します。
+- 保存時はローカル保存とキュー登録を同時に行います。
+- `revision`不一致は409とし、サーバー版採用か端末版上書きを利用者が選択します。
+- 削除日時より古いキューは見積を復活させません。
+- 旧クラウド見積はIDと更新日時を維持して未割当で移行し、管理者が担当者へ割り当てます。
+
+## 印刷
+
+お客様説明モードから印刷します。未完成の選択プランがある場合は印刷を開始しません。
+
+- 用紙: A4横
+- 1ページ目: 顧客・車両概要、完成済みプラン比較
+- 2ページ目: 維持費金額表、回数・周期表
+- チャートと操作UIは印刷しません。
+- `※本シミュレーションは概算です。`の注意書きを表示します。
+
+## Vercel環境変数
+
+```text
+VITE_CLERK_PUBLISHABLE_KEY
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+CLERK_SECRET_KEY
+CLERK_AUTHORIZED_PARTIES
+UPSTASH_REDIS_REST_URL または KV_REST_API_URL
+UPSTASH_REDIS_REST_TOKEN または KV_REST_API_TOKEN
 ```
+
+移行期間だけ次も使用します。
+
+```text
+APP_PASSWORD
+AUTH_SECRET
+CLERK_DEFAULT_ORGANIZATION_ID
+```
+
+Clerk Marketplace導入、Preview公開、本番切替、旧認証変数削除は運用確認を分けて実施します。
+
+Clerk Marketplaceは`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`を自動設定します。Vite向けの`VITE_CLERK_PUBLISHABLE_KEY`には同じ公開キーを設定します。サーバーは`CLERK_PUBLISHABLE_KEY`またはMarketplace名を参照します。

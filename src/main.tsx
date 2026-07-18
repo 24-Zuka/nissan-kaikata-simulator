@@ -1,10 +1,13 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { App } from './app/App'
-import './app/App.css'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { AuthBoundary } from './auth/AuthBoundary'
+import { applyTheme, getInitialTheme } from './theme/theme'
+import './app/global.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+applyTheme(getInitialTheme())
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+      <AuthBoundary />
+  </StrictMode>,
 )
