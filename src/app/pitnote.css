@@ -12,4 +12,5 @@
 @media print{.pricing-snapshot{font-size:8px;line-height:1.25;margin:3px 0}}
 
 .brand .pitnote-mark{font-size:22px;color:#fff;font-weight:700}
+.vehicle-model-search{margin:16px 0 20px}.vehicle-model-search>label{display:block;font-size:13px;font-weight:650;margin-bottom:8px}.vehicle-model-search__controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.vehicle-model-search__controls input{min-width:0;width:100%;min-height:44px}.vehicle-model-search__controls button{min-width:72px;min-height:44px}.vehicle-model-search .field__hint{margin:8px 0 0;overflow-wrap:anywhere}
 @media print{ :root,:root[data-theme="dark"]{--print-accent:#176457;--print-accent-strong:#124f45;--print-accent-soft:#e8f3ef;--print-accent-muted:#d7ebe3} }

@@ -3,6 +3,23 @@ import {createBlankScenario, templateFromScenario} from '../src/features/templat
 const origin='http://127.0.0.1:4190'
 const stamp='2026-10-17T12:00:00.000Z'
 const fixture={customers:['qa-c1','qa-c2'].map(id=>({id,name:'架空 同名',phone:'',email:'',pref:'不明',sms:'不明',notes:'保存されるメモ'})),vehicles:[['qa-v1','qa-c1','1234'],['qa-v2','qa-c1','5678'],['qa-v3','qa-c2','9012']].map(([id,customerId,numberLast4])=>({id,customerId,numberLast4,model:'ノート',state:'管理中',inspection:'2026-12-01',shaken:'2027-03-01',firstRegistration:'2021-03',bundledPlan:'なし'})),history:[]}
+test('vehicle search filters kana and English names while preserving selected conditions on mobile',async({page},info)=>{
+ await page.setViewportSize({width:1440,height:1000});await seed(page);page.on('dialog',d=>d.accept());const frame=await open(page)
+ const picker=frame.getByRole('region',{name:'車種とグレードから条件を呼び出す'}),search=picker.getByRole('searchbox',{name:'車名で検索'}),model=picker.getByLabel('車種を選択',{exact:true}),grade=picker.getByLabel('グレードを選択',{exact:true})
+ await search.fill('のーと');await expect(model.locator('option')).toHaveText(['選択してください','ノート','ノート オーラ'])
+ await search.fill('ＮＯＴＥ');await expect(model.locator('option')).toHaveText(['選択してください','ノート','ノート オーラ'])
+ await model.selectOption('ノート');await grade.selectOption({label:'X FOUR · 4WD'});await picker.getByRole('button',{name:'この車種で手入力を開始'}).click()
+ await frame.getByLabel('新車見積総額',{exact:true}).fill('2850000');await search.fill('serena')
+ await expect(model).toHaveValue('ノート');await expect(grade.locator('option:checked')).toHaveText('X FOUR · 4WD');await expect(model.locator('option')).toHaveText(['選択してください','ノート（選択中）','セレナ']);await expect(frame.getByLabel('新車見積総額',{exact:true})).toHaveValue('2,850,000')
+ await picker.screenshot({path:info.outputPath('vehicle-search-desktop.png')})
+ await search.fill('見つからない車');await expect(picker.getByText(/該当する車種はありません/)).toBeVisible();await expect(model).toHaveValue('ノート');await expect(grade.locator('option:checked')).toHaveText('X FOUR · 4WD')
+ await picker.getByRole('button',{name:'車名検索をクリア'}).click();await expect(search).toBeFocused();await expect(search).toHaveValue('');await expect(model.locator('option')).toHaveCount(12)
+ await page.setViewportSize({width:390,height:844});await search.fill('x-trail');await expect(model.locator('option')).toHaveText(['選択してください','ノート（選択中）','エクストレイル']);await model.selectOption('エクストレイル');await expect(grade).toHaveValue('');await expect(grade.locator('option').nth(1)).toContainText('e-4ORCE')
+ await expect(frame.getByLabel('新車見積総額',{exact:true})).toHaveValue('2,850,000');await picker.screenshot({path:info.outputPath('vehicle-search-mobile.png')})
+ expect(await page.frames().find(f=>f.url().includes('/carplan/embed'))!.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
+ expect((await search.boundingBox())!.height).toBeGreaterThanOrEqual(44);expect((await picker.getByRole('button',{name:'車名検索をクリア'}).boundingBox())!.height).toBeGreaterThanOrEqual(44)
+ await grade.selectOption({index:1});await picker.getByRole('button',{name:'この車種で手入力を開始'}).click();await expect(frame.getByLabel('新車見積総額',{exact:true})).toHaveValue('')
+})
 async function seed(page:Page){await page.goto(origin);await expect(page.locator('.brand')).toBeVisible();await page.evaluate(async data=>{
  // @ts-expect-error browser-only static module
  const {openStore}=await import('/local-storage.mjs');const store=await openStore();const row=await store.load();await store.save(data,row?.revision||0);store.close();
