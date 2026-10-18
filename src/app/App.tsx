@@ -1,3 +1,5 @@
+import { MaintenancePanel } from '../features/maintenance/MaintenancePanel'
+import { VehiclePresetPicker } from '../features/templates/VehiclePresetPicker'
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   checkSession,
@@ -8,7 +10,6 @@ import {
   setAuthMarker,
 } from '../auth/authClient'
 import { calculateComparison } from '../domain/comparison'
-import { createInitialScenario } from '../domain/defaults'
 import type { CloudScenarioSummary, SavedScenario, Scenario } from '../domain/types'
 import { LoginScreen } from '../features/auth/LoginScreen'
 import { ThemeToggle } from '../components/ThemeToggle'
@@ -40,6 +41,9 @@ import {
 import { getInitialTheme, saveTheme, type ThemePreference } from '../theme/theme'
 import './App.css'
 import './print.css'
+import './pitnote.css'
+import { TemplatePanel } from '../features/templates/TemplatePanel'
+import { createBlankScenario, loadTemplates, saveTemplates, type ModelTemplate } from '../features/templates/modelTemplates'
 
 type Mode = 'input' | 'presentation'
 type AuthState = 'checking' | 'authenticated' | 'unauthenticated'
@@ -70,7 +74,7 @@ const DetailInputScreen = lazy(() =>
 )
 
 function initialScenario(): Scenario {
-  return getScenarioFromHash(window.location.hash) ?? createInitialScenario()
+  return getScenarioFromHash(window.location.hash) ?? createBlankScenario()
 }
 
 function initialMode(): Mode {
@@ -95,6 +99,9 @@ export default function App({ externalAuth }: AppProps = {}) {
   const [loginError, setLoginError] = useState('')
   const [scenario, setScenario] = useState<Scenario>(initialScenario)
   const [savedSnapshot, setSavedSnapshot] = useState(() => JSON.stringify(initialScenario()))
+  const [templates, setTemplates] = useState<ModelTemplate[]>(() => { try { return loadTemplates(localStorage, storageScope) } catch { return [] } })
+  const [templateLoadError] = useState(() => { try { loadTemplates(localStorage, storageScope); return '' } catch { return '車種別設定を読み込めません。保存済みの元データは変更していません。' } })
+  const [templateDirty, setTemplateDirty] = useState(false)
   const [mode, setMode] = useState<Mode>(initialMode)
   const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>(() =>
     loadScenarios(localStorage, storageScope),
@@ -120,7 +127,7 @@ export default function App({ externalAuth }: AppProps = {}) {
   const inputScrollPosition = useRef(0)
   const result = useMemo(() => calculateComparison(scenario), [scenario])
   const scenarioSnapshot = useMemo(() => JSON.stringify(scenario), [scenario])
-  const hasUnsavedChanges = scenarioSnapshot !== savedSnapshot
+  const hasUnsavedChanges = scenarioSnapshot !== savedSnapshot || templateDirty
   const scenarioOptions = useMemo(() => {
     const merged = new Map<string, {
       id: string
@@ -144,6 +151,8 @@ export default function App({ externalAuth }: AppProps = {}) {
 
   const changeMode = useCallback((nextMode: Mode) => {
     if (nextMode === mode) return
+    if (templateDirty && !window.confirm('編集中の概算設定を破棄して画面を切り替えますか？')) return
+    setTemplateDirty(false)
     if (mode === 'input') inputScrollPosition.current = window.scrollY
     setMode(nextMode)
     window.requestAnimationFrame(() => {
@@ -152,7 +161,7 @@ export default function App({ externalAuth }: AppProps = {}) {
         behavior: 'auto',
       })
     })
-  }, [mode])
+  }, [mode, templateDirty])
 
   useEffect(() => {
     if (!hasUnsavedChanges) return
@@ -331,7 +340,7 @@ export default function App({ externalAuth }: AppProps = {}) {
     ) return
     setSelectedSavedId(id)
     if (!id) {
-      const nextScenario = createInitialScenario()
+      const nextScenario = createBlankScenario()
       setScenario(nextScenario)
       setSavedSnapshot(JSON.stringify(nextScenario))
       setMessage('新しい見積を開始しました。')
@@ -662,6 +671,8 @@ export default function App({ externalAuth }: AppProps = {}) {
       )}
       </>}
 
+      {templateLoadError && <p className="notice" role="alert">{templateLoadError}</p>}
+      {mode === 'input' && <><MaintenancePanel scenario={scenario} onChange={setScenario}/><VehiclePresetPicker key={`${scenario.quote.carName}:${scenario.quote.grade}:${scenario.quote.drive}`} scenario={scenario} templates={templates} onChange={setScenario}/><TemplatePanel scenario={scenario} templates={templates} onDirtyChange={setTemplateDirty} onApply={setScenario} onSave={next => { loadTemplates(localStorage, storageScope); saveTemplates(next, localStorage, storageScope); setTemplates(next) }}/></>}
       <Suspense fallback={<div className="screen-loading" role="status">画面を読み込んでいます…</div>}>
         {mode === 'input' ? (
           <DetailInputScreen scenario={scenario} result={result} onChange={setScenario} />

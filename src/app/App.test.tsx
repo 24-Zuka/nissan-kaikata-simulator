@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AUTH_STORAGE_KEY } from '../auth/authClient'
 import { CLOUD_MIGRATION_KEY } from '../storage/cloudSync'
 import App from './App'
+import { createInitialScenario } from '../domain/defaults'
+import { encodeSharedScenario } from '../storage/scenarioStorage'
 
 describe('App', () => {
   beforeEach(() => {
@@ -55,6 +57,8 @@ describe('App', () => {
   })
 
   it('shows only completed plans in the customer presentation', async () => {
+    // Regression: existing v11 conditions keep their original calculation behavior.
+    window.location.hash = 'share=' + encodeSharedScenario(createInitialScenario())
     const user = userEvent.setup()
     render(<App />)
 
@@ -142,7 +146,7 @@ describe('App', () => {
     expect(
       within(credit).getByText('入力した支払額で試算', { selector: '.calculation-note strong' }),
     ).toBeInTheDocument()
-    expect(within(credit).getByText('初回支払額は、2回目以降月額と同額で計算します。')).toBeInTheDocument()
+    expect(within(credit).getByText('初回支払額も明示入力してください。同額の場合も入力が必要です。')).toBeInTheDocument()
     expect(within(credit).getByText(/参考値として保存します/)).toBeInTheDocument()
     expect(
       within(bvc).getByText('入力した支払額で試算', { selector: '.calculation-note strong' }),
@@ -151,6 +155,8 @@ describe('App', () => {
   })
 
   it('removes disabled plans from the input flow and comparison count', async () => {
+    // Regression: existing v11 conditions keep their original calculation behavior.
+    window.location.hash = 'share=' + encodeSharedScenario(createInitialScenario())
     const user = userEvent.setup()
     render(<App />)
 

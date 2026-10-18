@@ -70,7 +70,9 @@ export function createInitialScenario(): Scenario {
     quote: {
       scenarioName: '新規見積',
       quoteDate: today(),
-      staffName: '',
+      staffName: '西塚',
+      drive: '',
+      amountStatus: 'unreviewed',
       customerName: '',
       carName: '',
       grade: '',

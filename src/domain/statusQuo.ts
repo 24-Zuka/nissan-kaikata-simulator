@@ -84,13 +84,25 @@ export function calculateStatusQuo(scenario: Scenario): PlanResult {
   const futureLoanPayment = scheduledRemaining > 0 ? scheduledRemaining : remainingDebt
   const originalPurchasePrice = normalizeYen(current.originalPurchasePrice)
   const maintenanceMonths = maintenanceYearsToMonths(current.currentMaintenanceYears)
-  const currentCarInspections = calculateCurrentCarInspectionMonths(
+  let currentCarInspections = calculateCurrentCarInspectionMonths(
     current.firstRegistrationMonth,
     maintenanceMonths,
+    scenario.strictInput && scenario.quote.quoteDate ? new Date(scenario.quote.quoteDate + 'T12:00:00') : new Date(),
   )
+  if (scenario.strictInput && current.nextInspectionMonth) {
+    const due = parseRegistrationMonth(current.nextInspectionMonth)
+    const start = currentMonthIndex(new Date(scenario.quote.quoteDate + 'T12:00:00'))
+    if (due !== null) {
+      const months: number[] = []
+      for (let month = Math.max(0, due - start); month < maintenanceMonths; month += 24) months.push(month)
+      currentCarInspections = { months }
+    }
+  }
   const maintenance = calculateMaintenance({
     comparisonMonths: maintenanceMonths,
     inspectionCost: current.inspectionCost,
+    inspectionServiceCost: current.inspectionServiceCost,
+    inspectionLegalCost: current.inspectionLegalCost,
     legalInspectionCost: current.legalInspectionCost,
     sixMonthInspectionCost: current.sixMonthInspectionCost,
     tireCost: current.tireCost,
@@ -102,7 +114,7 @@ export function calculateStatusQuo(scenario: Scenario): PlanResult {
     vehicleCondition: 'used',
     nextInspectionMonths: '',
     inspectionMonthsOverride: currentCarInspections.months,
-    inspectionCycleLabel: '初度登録から3年目・以後2年ごと',
+    inspectionCycleLabel: scenario.strictInput && current.nextInspectionMonth ? '登録済み次回車検・以後2年ごと' : '初度登録から3年目・以後2年ごと',
     inspectionWarning: currentCarInspections.warning,
   })
   const totalPayment = originalPurchasePrice + futureLoanPayment

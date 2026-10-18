@@ -22,6 +22,8 @@ export type QuoteInput = {
   customerName: string
   carName: string
   grade: string
+  drive?: string
+  amountStatus?: 'unreviewed' | 'estimate' | 'confirmed'
 }
 
 export type VehicleInput = {
@@ -34,13 +36,21 @@ export type VehicleInput = {
   nextInspectionMonths: number | ''
 }
 
-export type CurrentCarInput = {
+export type MaintenanceSource = { model: string; masterVersion: string; codes: string; appliedAt: string; detail: string }
+export type InspectionParts = {
+  inspectionServiceCost?: MoneyInput
+  inspectionLegalCost?: MoneyInput
+  pricingSource?: MaintenanceSource
+}
+
+export type CurrentCarInput = InspectionParts & {
   currentMaintenanceYears: number
   originalPurchasePrice: MoneyInput
   remainingDebt: MoneyInput
   remainingPayments: number | ''
   monthlyPayment: MoneyInput
   firstRegistrationMonth: string
+  nextInspectionMonth?: string
   inspectionCost: MoneyInput
   legalInspectionCost: MoneyInput
   sixMonthInspectionCost: MoneyInput
@@ -51,7 +61,7 @@ export type CurrentCarInput = {
   tireCycleYears: number | ''
 }
 
-export type MaintenanceInput = {
+export type MaintenanceInput = InspectionParts & {
   inspectionCost: MoneyInput
   legalInspectionCost: MoneyInput
   sixMonthInspectionCost: MoneyInput
@@ -114,7 +124,22 @@ export type OmatomeInput = {
   included: OmatomeIncludedItems
 }
 
+export type CustomerLink = {
+  customerId: string
+  vehicleId: string
+  customerName: string
+  vehicleName: string
+  numberLast4: string
+  firstRegistrationMonth: string
+  nextInspectionMonth?: string
+  capturedAt: string
+}
+
 export type Scenario = {
+  customerLink?: CustomerLink
+  strictInput?: boolean
+  templateSource?: { id: string; name: string; updatedAt: string }
+
   schemaVersion: number
   comparison: ComparisonInput
   quote: QuoteInput

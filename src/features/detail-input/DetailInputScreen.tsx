@@ -34,7 +34,7 @@ type Props = {
   onChange: (scenario: Scenario) => void
 }
 
-type ScenarioSection = Exclude<keyof Scenario, 'schemaVersion'>
+type ScenarioSection = Exclude<keyof Scenario, 'schemaVersion' | 'customerLink' | 'strictInput' | 'templateSource'>
 type MaintenanceTab = 'currentCar' | 'newMaintenance' | 'usedMaintenance'
 
 const PLAN_COPY: Record<PurchasablePlanId, { label: string; description: string }> = {
@@ -45,9 +45,11 @@ const PLAN_COPY: Record<PurchasablePlanId, { label: string; description: string 
 }
 
 function PaymentEntryStatus({
+  strict = false,
   firstPayment,
   monthlyPayment,
 }: {
+  strict?: boolean
   firstPayment: MoneyInput
   monthlyPayment: MoneyInput
 }) {
@@ -56,7 +58,7 @@ function PaymentEntryStatus({
   if (manual && monthlyPayment === '') {
     description = '手入力で試算するには、2回目以降月額を入力してください。'
   } else if (manual && firstPayment === '') {
-    description = '初回支払額は、2回目以降月額と同額で計算します。'
+    description = strict ? '初回支払額も明示入力してください。同額の場合も入力が必要です。' : '初回支払額は、2回目以降月額と同額で計算します。'
   } else if (manual) {
     description = '初回支払額と2回目以降月額から支払総額を計算します。'
   }
@@ -209,6 +211,11 @@ export function DetailInputScreen({ scenario, result, onChange }: Props) {
   }
 
   const changeVehicleClass = (vehicleClass: VehicleClass) => {
+    if (scenario.strictInput) {
+      onChange({ ...scenario, vehicle: { ...scenario.vehicle, vehicleClass } })
+      return
+    }
+    if (!window.confirm('車両クラスの標準維持費で現在の入力を置き換えますか？')) return
     const defaults = MAINTENANCE_DEFAULTS[vehicleClass]
     onChange({
       ...scenario,
@@ -266,7 +273,11 @@ export function DetailInputScreen({ scenario, result, onChange }: Props) {
     const updateMaintenance = (patch: Partial<MaintenanceInput>) => update(section, patch)
     return (
       <>
-        <NumberField label="車検費用" value={maintenance.inspectionCost} onValueChange={(inspectionCost) => updateMaintenance({ inspectionCost })} />
+        {maintenance.inspectionServiceCost === undefined ? <NumberField label="車検費用" value={maintenance.inspectionCost} onValueChange={(inspectionCost) => updateMaintenance({ inspectionCost })} /> : <>
+          <NumberField label="車検整備料（手修正可）" value={maintenance.inspectionServiceCost} onValueChange={inspectionServiceCost => updateMaintenance({ inspectionServiceCost })}/>
+          <NumberField label="車検法定費用等（手入力）" value={maintenance.inspectionLegalCost ?? ''} onValueChange={inspectionLegalCost => updateMaintenance({ inspectionLegalCost })} hint="重量税・自賠責・印紙等。整備料に含まれた更新手続料は加えないでください。"/>
+          <p className="field--wide">PITNOTE概算：{maintenance.pricingSource?.model} · {maintenance.pricingSource?.masterVersion}。取り込み時の単価・内訳を保持し、修正した金額で計算します。</p>
+        </>}
         <NumberField label="法定12か月点検" value={maintenance.legalInspectionCost} onValueChange={(legalInspectionCost) => updateMaintenance({ legalInspectionCost })} />
         <NumberField label="6か月点検" value={maintenance.sixMonthInspectionCost} onValueChange={(sixMonthInspectionCost) => updateMaintenance({ sixMonthInspectionCost })} />
         <NumberField label="夏・冬タイヤ" value={maintenance.tireCost} onValueChange={(tireCost) => updateMaintenance({ tireCost })} />
@@ -295,7 +306,10 @@ export function DetailInputScreen({ scenario, result, onChange }: Props) {
 
   const renderCurrentMaintenanceFields = () => (
     <>
-      <NumberField label="車検費用" value={scenario.currentCar.inspectionCost} onValueChange={(inspectionCost) => update('currentCar', { inspectionCost })} />
+      {scenario.currentCar.inspectionServiceCost === undefined ? <NumberField label="車検費用" value={scenario.currentCar.inspectionCost} onValueChange={(inspectionCost) => update('currentCar', { inspectionCost })} /> : <>
+        <NumberField label="車検整備料（手修正可）" value={scenario.currentCar.inspectionServiceCost} onValueChange={inspectionServiceCost => update('currentCar',{inspectionServiceCost})}/>
+        <NumberField label="車検法定費用等（手入力）" value={scenario.currentCar.inspectionLegalCost ?? ''} onValueChange={inspectionLegalCost => update('currentCar',{inspectionLegalCost})}/>
+      </>}
       <NumberField label="法定12か月点検" value={scenario.currentCar.legalInspectionCost} onValueChange={(legalInspectionCost) => update('currentCar', { legalInspectionCost })} />
       <NumberField label="6か月点検" value={scenario.currentCar.sixMonthInspectionCost} onValueChange={(sixMonthInspectionCost) => update('currentCar', { sixMonthInspectionCost })} />
       <NumberField label="夏・冬タイヤ" value={scenario.currentCar.tireCost} onValueChange={(tireCost) => update('currentCar', { tireCost })} />
@@ -369,7 +383,11 @@ export function DetailInputScreen({ scenario, result, onChange }: Props) {
               <FormSection id="section-quote" title="商談情報" description="保存名とお客様へ表示する基本情報です。">
                 <TextField id="quote-scenarioName" label="案件名" required error={errorFor('quote', 'scenarioName')} value={scenario.quote.scenarioName} onBlur={() => markTouched('quote', 'scenarioName')} onValueChange={(scenarioName) => update('quote', { scenarioName })} />
                 <TextField label="見積作成日" type="date" value={scenario.quote.quoteDate} onValueChange={(quoteDate) => update('quote', { quoteDate })} />
-                <TextField label="担当者" value={scenario.quote.staffName} onValueChange={(staffName) => update('quote', { staffName })} />
+                <TextField label="担当者" value="西塚" readOnly onValueChange={() => {}} />
+                <TextField label="駆動方式" value={scenario.quote.drive || ''} onValueChange={(drive) => update('quote', { drive })} />
+                <SelectField label="金額の確認区分" value={scenario.quote.amountStatus || 'unreviewed'} onValueChange={(amountStatus) => update('quote', { amountStatus: amountStatus as Scenario['quote']['amountStatus'] })}>
+                  <option value="unreviewed">未確認</option><option value="estimate">概算</option><option value="confirmed">入力金額を確認済み</option>
+                </SelectField>
                 <TextField label="顧客名" value={scenario.quote.customerName} onValueChange={(customerName) => update('quote', { customerName })} />
                 <TextField label="車種" value={scenario.quote.carName} onValueChange={(carName) => update('quote', { carName })} />
                 <TextField label="グレード" value={scenario.quote.grade} onValueChange={(grade) => update('quote', { grade })} />
@@ -380,7 +398,7 @@ export function DetailInputScreen({ scenario, result, onChange }: Props) {
                   <option value="new">新車</option>
                   <option value="used">中古車</option>
                 </SelectField>
-                <SelectField label="車両クラス" value={scenario.vehicle.vehicleClass} onValueChange={(vehicleClass) => changeVehicleClass(vehicleClass as VehicleClass)} hint="変更すると維持費の標準値を更新します。">
+                <SelectField label="車両クラス" value={scenario.vehicle.vehicleClass} onValueChange={(vehicleClass) => changeVehicleClass(vehicleClass as VehicleClass)} hint={scenario.strictInput ? "分類だけ変更します。金額は手入力してください。" : "確認後に維持費の標準値を更新します。"}>
                   <option value="kei">軽自動車</option>
                   <option value="s">Sクラス</option>
                   <option value="m">Mクラス</option>
@@ -420,6 +438,7 @@ export function DetailInputScreen({ scenario, result, onChange }: Props) {
                 <NumberField label="残りローン回数" suffix="回" value={scenario.currentCar.remainingPayments} onValueChange={(remainingPayments) => update('currentCar', { remainingPayments })} />
                 <NumberField label="月の支払額" value={scenario.currentCar.monthlyPayment} onValueChange={(monthlyPayment) => update('currentCar', { monthlyPayment })} />
                 <NumberField label="維持期間" suffix="年" min={1} max={20} required value={scenario.currentCar.currentMaintenanceYears} onValueChange={(currentMaintenanceYears) => update('currentCar', { currentMaintenanceYears: Math.min(20, Math.max(1, Math.round(Number(currentMaintenanceYears) || 1))) })} />
+                {scenario.strictInput && <TextField label="現在車の次回車検月" type="month" value={scenario.currentCar.nextInspectionMonth || ''} onValueChange={nextInspectionMonth => update('currentCar',{nextInspectionMonth})} hint="実際の期限が分かる場合。初度登録からの推定より優先します。"/>}
                 <TextField id="currentCar-firstRegistrationMonth" label="初度登録年月" type="month" required={statusQuoResult?.isVisible} value={scenario.currentCar.firstRegistrationMonth} error={errorFor('currentCar', 'firstRegistrationMonth')} onBlur={() => markTouched('currentCar', 'firstRegistrationMonth')} onValueChange={(firstRegistrationMonth) => update('currentCar', { firstRegistrationMonth })} hint="現在年月から維持期間分を見て、車検回数を自動計算します。" />
               </FormSection>
             </div>
@@ -495,7 +514,7 @@ export function DetailInputScreen({ scenario, result, onChange }: Props) {
                   <NumberField label="支払回数" suffix="回" value={scenario.credit.paymentCount} onValueChange={(paymentCount) => update('credit', { paymentCount: Number(paymentCount) || 0 })} />
                   <NumberField label="ボーナス月加算額" value={scenario.credit.bonusPayment} onValueChange={(bonusPayment) => update('credit', { bonusPayment })} />
                   <NumberField label="維持期間" suffix="年" min={1} max={20} required value={scenario.credit.creditMaintenanceYears} onValueChange={(creditMaintenanceYears) => update('credit', { creditMaintenanceYears: Math.min(20, Math.max(1, Math.round(Number(creditMaintenanceYears) || 1))) })} />
-                  <PaymentEntryStatus firstPayment={scenario.credit.firstPayment} monthlyPayment={scenario.credit.monthlyPayment} />
+                  <PaymentEntryStatus strict={scenario.strictInput} firstPayment={scenario.credit.firstPayment} monthlyPayment={scenario.credit.monthlyPayment} />
                 </PlanFormSection>
               )}
 
@@ -510,7 +529,7 @@ export function DetailInputScreen({ scenario, result, onChange }: Props) {
                   <NumberField id="bvc-residualValue" label="残価" required error={errorFor('bvc', 'residualValue')} value={scenario.bvc.residualValue} onBlur={() => markTouched('bvc', 'residualValue')} onValueChange={(residualValue) => update('bvc', { residualValue })} />
                   <Field label="比較表の表示"><div className="segmented-control"><label><input type="radio" name="bvc-mode" checked={scenario.bvc.selectedMode === 'return'} onChange={() => update('bvc', { selectedMode: 'return' })} /><span>返却時</span></label><label><input type="radio" name="bvc-mode" checked={scenario.bvc.selectedMode === 'purchase'} onChange={() => update('bvc', { selectedMode: 'purchase' })} /><span>買取時</span></label></div></Field>
                   {scenario.bvc.selectedMode === 'return' ? <Field label="維持期間"><div className="calculation-note"><strong>{paymentCountToYears(scenario.bvc.paymentCount)}年</strong><span>支払期間に連動し、変更できません。</span></div></Field> : <NumberField label="維持期間" suffix="年" min={paymentCountToYears(scenario.bvc.paymentCount)} max={20} required value={scenario.bvc.bvcMaintenanceYears} onValueChange={(bvcMaintenanceYears) => update('bvc', { bvcMaintenanceYears: Math.min(20, Math.max(paymentCountToYears(scenario.bvc.paymentCount), Math.round(Number(bvcMaintenanceYears) || 1))) })} hint={`${paymentCountToYears(scenario.bvc.paymentCount)}〜20年の整数で入力します。`} />}
-                  <PaymentEntryStatus firstPayment={scenario.bvc.firstPayment} monthlyPayment={scenario.bvc.monthlyPayment} />
+                  <PaymentEntryStatus strict={scenario.strictInput} firstPayment={scenario.bvc.firstPayment} monthlyPayment={scenario.bvc.monthlyPayment} />
                 </PlanFormSection>
               )}
 

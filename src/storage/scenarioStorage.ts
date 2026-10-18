@@ -81,6 +81,7 @@ function migrateMaintenanceInput(
 ): MaintenanceInput {
   return {
     ...mergeKnown(initial, value),
+    ...inspectionParts(value),
     tireCycleYears:
       validYears(value.tireCycleYears) ??
       yearsFromMonths(value.tireCycleMonths) ?? 4,
@@ -162,7 +163,10 @@ export function migrateScenario(value: unknown): Scenario {
           : true,
       },
     },
-    quote: mergeKnown(initial.quote, quoteValue),
+    quote: { ...mergeKnown(initial.quote, quoteValue), staffName: '西塚' },
+    ...(value.customerLink ? { customerLink: structuredClone(value.customerLink) } : {}),
+    ...(value.strictInput === true ? { strictInput: true } : {}),
+    ...(value.templateSource ? { templateSource: structuredClone(value.templateSource) } : {}),
     vehicle: {
       ...mergeKnown(initial.vehicle, vehicleValue),
       estimateTotal:
@@ -174,6 +178,8 @@ export function migrateScenario(value: unknown): Scenario {
     },
     currentCar: {
       ...mergeKnown(initial.currentCar, currentCarValue),
+      ...inspectionParts(currentCarValue),
+      ...(currentCarValue.nextInspectionMonth !== undefined ? { nextInspectionMonth: registrationMonthValue(currentCarValue.nextInspectionMonth) } : {}),
       currentMaintenanceYears:
         validYears(currentCarValue.currentMaintenanceYears) ??
         yearsFromMonths(currentCarValue.currentMaintenanceMonths) ??
@@ -277,14 +283,14 @@ export function loadScenarios(
   try {
     const raw = storage.getItem(scenarioStorageKey(scope)) ??
       (!scope ? storage.getItem(V10_STORAGE_KEY) : null) ??
-      storage.getItem(V9_STORAGE_KEY) ??
-      storage.getItem(V8_STORAGE_KEY) ??
-      storage.getItem(V7_STORAGE_KEY) ??
-      storage.getItem(V6_STORAGE_KEY) ??
-      storage.getItem(V5_STORAGE_KEY) ??
-      storage.getItem(V4_STORAGE_KEY) ??
-      storage.getItem(V3_STORAGE_KEY) ??
-      storage.getItem(LEGACY_STORAGE_KEY)
+      (!scope ? storage.getItem(V9_STORAGE_KEY) : null) ??
+      (!scope ? storage.getItem(V8_STORAGE_KEY) : null) ??
+      (!scope ? storage.getItem(V7_STORAGE_KEY) : null) ??
+      (!scope ? storage.getItem(V6_STORAGE_KEY) : null) ??
+      (!scope ? storage.getItem(V5_STORAGE_KEY) : null) ??
+      (!scope ? storage.getItem(V4_STORAGE_KEY) : null) ??
+      (!scope ? storage.getItem(V3_STORAGE_KEY) : null) ??
+      (!scope ? storage.getItem(LEGACY_STORAGE_KEY) : null)
     if (!raw) return []
     const parsed: unknown = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
@@ -391,10 +397,13 @@ function fromBase64Url(value: string): string {
 export function createShareSafeScenario(scenario: Scenario): Scenario {
   return {
     ...scenario,
+    customerLink: undefined,
+    templateSource: undefined,
     schemaVersion: SCHEMA_VERSION,
     quote: {
       ...scenario.quote,
       customerName: '',
+      scenarioName: '共有見積',
       staffName: '',
     },
   }
@@ -408,7 +417,9 @@ export function decodeSharedScenario(value: string): Scenario | null {
   try {
     const parsed: unknown = JSON.parse(fromBase64Url(value))
     if (!isRecord(parsed)) return null
-    return migrateScenario(parsed)
+    const decoded = migrateScenario(parsed)
+    decoded.quote.staffName = ''
+    return decoded
   } catch {
     return null
   }
@@ -417,4 +428,12 @@ export function decodeSharedScenario(value: string): Scenario | null {
 export function getScenarioFromHash(hash: string): Scenario | null {
   const match = hash.match(/^#share=([A-Za-z0-9_-]+)$/)
   return match ? decodeSharedScenario(match[1]) : null
+}
+
+function inspectionParts(value: Record<string, unknown>) {
+  return value.inspectionServiceCost !== undefined ? {
+    inspectionServiceCost: moneyValue(value.inspectionServiceCost),
+    inspectionLegalCost: moneyValue(value.inspectionLegalCost),
+    ...(isRecord(value.pricingSource) ? { pricingSource: structuredClone(value.pricingSource) } : {}),
+  } : {}
 }

@@ -5,6 +5,7 @@ import { calculateOmatome } from './omatome'
 import { getVehicleAmounts } from './planHelpers'
 import { calculateStatusQuo } from './statusQuo'
 import type { ComparisonResult, PlanResult, Scenario } from './types'
+import { strictMissingFields } from './strictInput'
 import { validateScenario } from './validation'
 
 export function calculateComparison(scenario: Scenario): ComparisonResult {
@@ -22,7 +23,16 @@ export function calculateComparison(scenario: Scenario): ComparisonResult {
       plan.isVisible = scenario.comparison.enabledPlans[plan.planId]
     }
   }
-  const statusQuoTotal = statusQuo.isVisible ? statusQuo.effectiveTotal : undefined
+  if (scenario.strictInput) {
+    for (const plan of plans) {
+      const missing = strictMissingFields(scenario, plan.planId)
+      if (missing.length) {
+        plan.isComplete = false
+        plan.warnings.unshift(`未設定: ${missing.join('、')}。0円の場合も明示入力してください。`)
+      }
+    }
+  }
+  const statusQuoTotal = statusQuo.isVisible && statusQuo.isComplete ? statusQuo.effectiveTotal : undefined
 
   for (const plan of plans) {
     if (statusQuoTotal !== undefined && plan.planId !== 'statusQuo') {

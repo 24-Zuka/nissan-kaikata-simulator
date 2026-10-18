@@ -42,6 +42,12 @@ export function isValidScenario(value: unknown): value is Scenario {
     .some((section) => !section || typeof section !== 'object' || Array.isArray(section))) {
     return false
   }
+  const validParts = (m: Scenario['newMaintenance'] | Scenario['currentCar']) =>
+    (m.inspectionServiceCost === undefined || money(m.inspectionServiceCost))
+    && (m.inspectionLegalCost === undefined || money(m.inspectionLegalCost))
+    && (m.pricingSource === undefined || (m.pricingSource && typeof m.pricingSource === 'object'
+      && text(m.pricingSource.model) && text(m.pricingSource.masterVersion) && text(m.pricingSource.codes)
+      && text(m.pricingSource.appliedAt,40) && text(m.pricingSource.detail,100000)))
   const validMaintenance = (maintenance: Scenario['newMaintenance']) =>
     [maintenance.inspectionCost, maintenance.legalInspectionCost,
       maintenance.sixMonthInspectionCost, maintenance.tireCost,
@@ -58,7 +64,20 @@ export function isValidScenario(value: unknown): value is Scenario {
     && ['cash', 'credit', 'bvc', 'omatome']
       .every((planId) => typeof enabledPlans[planId as keyof typeof enabledPlans] === 'boolean')
 
-  return scenario.schemaVersion === 11
+  const link = scenario.customerLink
+  const validLink = link === undefined || (link && typeof link === 'object' && !Array.isArray(link)
+    && ['customerId', 'vehicleId', 'customerName', 'vehicleName', 'numberLast4', 'firstRegistrationMonth', 'capturedAt'].every(k => text(link[k as keyof typeof link], 200))
+    && link.customerId.length > 0 && link.vehicleId.length > 0
+    && registrationMonth(link.firstRegistrationMonth) && /^\d{0,4}$/.test(link.numberLast4)
+    && Number.isFinite(Date.parse(link.capturedAt)))
+  const source = scenario.templateSource
+  const validSource = source === undefined || (source && typeof source === 'object' && !Array.isArray(source)
+    && text(source.id) && text(source.name) && text(source.updatedAt, 40) && Number.isFinite(Date.parse(source.updatedAt)))
+  return validLink && validSource
+    && (scenario.strictInput === undefined || typeof scenario.strictInput === 'boolean')
+    && (quote.drive === undefined || text(quote.drive, 100))
+    && (quote.amountStatus === undefined || ['unreviewed', 'estimate', 'confirmed'].includes(quote.amountStatus))
+    && scenario.schemaVersion === 11
     && validEnabledPlans
     && text(quote.scenarioName, 120)
     && text(quote.quoteDate, 20)
@@ -77,8 +96,10 @@ export function isValidScenario(value: unknown): value is Scenario {
       currentCar.tireCost, currentCar.annualTax, currentCar.monthlyInsurance,
       currentCar.repairCost].every(money)
     && registrationMonth(currentCar.firstRegistrationMonth)
+    && (currentCar.nextInspectionMonth === undefined || registrationMonth(currentCar.nextInspectionMonth))
     && (currentCar.remainingPayments === '' || integer(currentCar.remainingPayments, 0, 240))
     && (currentCar.tireCycleYears === '' || integer(currentCar.tireCycleYears, 1, 20))
+    && validParts(currentCar) && validParts(newMaintenance) && validParts(usedMaintenance)
     && validMaintenance(newMaintenance)
     && validMaintenance(usedMaintenance)
     && integer(cash.cashMaintenanceYears, 1, 20)

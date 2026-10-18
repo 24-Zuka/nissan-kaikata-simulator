@@ -827,7 +827,10 @@ export function QuoteSummary({
     ['車種', scenario.quote.carName || '未入力'],
     ['グレード', scenario.quote.grade || '未入力'],
     ['お客様名', scenario.quote.customerName || '未入力'],
-    ['担当者名', scenario.quote.staffName || '未入力'],
+    ['担当者名', '西塚'],
+    ['駆動方式', scenario.quote.drive || '未入力'],
+    ['金額区分', scenario.quote.amountStatus === 'confirmed' ? '入力金額確認済み・総額は試算' : scenario.quote.amountStatus === 'estimate' ? '概算' : '未確認'],
+    ...(scenario.templateSource ? [['概算設定', scenario.templateSource.name]] : []),
     ['作成日', scenario.quote.quoteDate || '未入力'],
     [
       '新車見積総額',

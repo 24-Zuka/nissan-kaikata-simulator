@@ -102,6 +102,7 @@ export function CustomerPresentation({
         </div>
         <PlanMaintenanceMatrix plans={completePlans} scenario={scenario} />
       </section>
+      {(Object.entries({現在車:scenario.currentCar,新車:scenario.newMaintenance,中古車:scenario.usedMaintenance})).filter(([,m])=>m.pricingSource).map(([label,m])=><p className="pricing-snapshot" key={label}>{label}：PITNOTE概算 {m.pricingSource?.model}（{m.pricingSource?.masterVersion}）。車検整備 {m.inspectionServiceCost === '' ? '未設定' : m.inspectionServiceCost?.toLocaleString('ja-JP')}円 ＋ 法定費用等 {m.inspectionLegalCost === '' ? '未設定' : m.inspectionLegalCost?.toLocaleString('ja-JP')}円。点検単価はオイル等の取込時内訳を含み、手修正後の値で試算。</p>)}
       <p className="print-disclaimer">
         ※本シミュレーションは概算です。<br />
         実際のお支払い金額・審査条件・登録費用・税金・保険料等により、最終的な金額は変動する場合がございます。

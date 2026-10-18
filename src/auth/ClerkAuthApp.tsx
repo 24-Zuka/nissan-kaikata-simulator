@@ -99,7 +99,7 @@ function AuthenticatedApp() {
     role: orgRole === 'org:admin' ? 'admin' : 'member',
     signOut: async () => { await signOut() },
   }
-  return <App externalAuth={externalAuth} />
+  return <App key={`${orgId}:${userId}`} externalAuth={externalAuth} />
 }
 
 export default function ClerkAuthApp({ publishableKey }: { publishableKey: string }) {

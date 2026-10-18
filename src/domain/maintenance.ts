@@ -79,6 +79,7 @@ function createBreakdownItem(
 }
 
 export function calculateMaintenance(input: MaintenanceCalculationInput): MaintenanceResult {
+  if (input.inspectionServiceCost !== undefined) input = { ...input, inspectionCost: Number(input.inspectionServiceCost || 0) + Number(input.inspectionLegalCost || 0) }
   const months = Math.max(0, Math.floor(input.comparisonMonths || 0))
   const warnings: string[] = []
   const nextInspection = normalizeOptionalYen(input.nextInspectionMonths)

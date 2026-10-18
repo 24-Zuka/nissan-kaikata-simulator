@@ -21,7 +21,8 @@ async function openAuthenticatedApp(page: Page, path = '/') {
 
 test('入力から完成プランのみをお客様説明に表示する', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await openAuthenticatedApp(page)
+  const legacy = Buffer.from(JSON.stringify(createInitialScenario())).toString('base64url')
+  await openAuthenticatedApp(page, `/#share=${legacy}`)
 
   await page.getByLabel('新車見積総額', { exact: true }).fill('5000000')
   await page.getByRole('button', { name: 'お客様説明', exact: true }).click()
@@ -80,7 +81,8 @@ test('比較できるプランが2件未満なら入力へ戻す', async ({ page
   await expect(page.getByRole('region', { name: 'プラン別実質総額' })).toHaveCount(0)
 })
 
-test('5プランの印刷がA4横2ページに収まる', async ({ page }, testInfo) => {
+test('5プランの印刷がA4横1ページに収まる', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1440, height: 1000 })
   const scenario = createInitialScenario()
   scenario.quote.carName = 'セレナ'
   scenario.quote.grade = 'e-POWER'
@@ -96,6 +98,7 @@ test('5プランの印刷がA4横2ページに収まる', async ({ page }, testI
   await mockAuthenticatedApi(page)
   await page.goto(`/?mode=presentation#share=${sharedScenario}`)
   await expect(page.getByText('5プラン比較', { exact: true })).toBeVisible()
+  await page.screenshot({ path: testInfo.outputPath('five-plan-screen.png'), fullPage: true })
 
   await page.emulateMedia({ media: 'print' })
   const pdf = await page.pdf({
@@ -105,5 +108,15 @@ test('5プランの印刷がA4横2ページに収まる', async ({ page }, testI
     path: testInfo.outputPath('five-plan-comparison.pdf'),
   })
   const pageCount = (pdf.toString('latin1').match(/\/Type\s*\/Page\b/g) ?? []).length
-  expect(pageCount).toBe(2)
+  expect(pageCount).toBe(1)
+})
+
+test('取り込んだ車検法定費用と西塚を含む新規比較を1ページで印刷する',async({page},testInfo)=>{
+ const scenario=createInitialScenario();scenario.strictInput=true;scenario.quote.amountStatus='estimate';scenario.vehicle.estimateTotal=3000000;scenario.vehicle.tradeIn=0;scenario.credit.downPayment=0;scenario.credit.bonusPayment=0
+ Object.assign(scenario.newMaintenance,{monthlyInsurance:0,repairCost:0,tireCycleYears:3,inspectionServiceCost:70000,inspectionLegalCost:55000,pricingSource:{model:'架空テストの料金',masterVersion:'テスト用の原表版',codes:'TEST',appliedAt:'2026-10-17T12:00:00.000Z',detail:'{}'}})
+ scenario.comparison.enabledPlans.bvc=false;scenario.comparison.enabledPlans.omatome=false
+ const shared=Buffer.from(JSON.stringify(scenario)).toString('base64url');await mockAuthenticatedApi(page);await page.goto(`/?mode=presentation#share=${shared}`)
+ await expect(page.getByText('2プラン比較',{exact:true})).toBeVisible();await expect(page.getByText('西塚',{exact:true})).toBeVisible();await expect(page.locator('.pricing-snapshot')).toContainText('55,000円')
+ await page.emulateMedia({media:'print'});
+ const pdf=await page.pdf({format:'A4',landscape:true,printBackground:true,path:testInfo.outputPath('source-snapshot-comparison.pdf')});expect((pdf.toString('latin1').match(/\/Type\s*\/Page\b/g)??[]).length).toBe(1)
 })

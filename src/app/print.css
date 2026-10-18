@@ -485,3 +485,44 @@
     text-align: right;
   }
 }
+
+/* One A4 landscape sheet: retain payment, unit costs, totals, counts and caveats. */
+@media print {
+  .presentation {width:281mm}
+  .presentation__intro {grid-template-columns: 0.65fr 2fr;align-items:center;gap:3mm;margin-bottom:2mm;padding-bottom:2mm}
+  .presentation h1 {font-size:15pt;gap:2mm}
+  .presentation h1::before {content:'P';width:7mm;height:7mm;font-size:10pt}
+  .quote-summary > div {padding:1mm 1.5mm;gap:1mm;overflow-wrap:anywhere}
+  .quote-summary dt {font-size:7pt}
+  .quote-summary dd {font-size:8pt}
+  .quote-summary dt,.quote-summary dd {line-height:1.2}
+  .section-heading h2,.maintenance-section h2 {font-size:10pt}
+  .comparison-section .section-heading {margin-bottom:1.5mm}
+  .comparison-table thead th {height:12mm;padding:1mm}
+  .comparison-table th,.comparison-table td {padding:0.5mm 1.2mm;font-size:8pt;line-height:1.15}
+  .comparison-table thead th > span {font-size:9pt}
+  .comparison-table thead th > small {font-size:6.8pt;margin-top:0.4mm}
+  .comparison-table tr.is-emphasis td {font-size:9pt}
+  .print-payment-table tr.print-emphasis-monthly td,.print-payment-table tr.print-emphasis-total td {font-size:10.5pt;padding-block:1mm}
+  .comparison-table-wrap {border-color:var(--print-accent-muted)}
+  .print-payment-table tr.is-emphasis th,.print-payment-table tr.is-emphasis td {background:var(--print-accent-soft)}
+  .maintenance-section {break-before:auto;margin-top:2mm}
+  .maintenance-section .section-heading {margin-bottom:1mm;padding-bottom:1mm}
+  .print-maintenance-details,.print-maintenance-details.has-five-plans {grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:2mm}
+  .print-maintenance-plan:last-child:nth-child(odd) {grid-column:auto}
+  .print-maintenance-plan h3 {display:block;font-size:8.3pt;margin-bottom:1mm}
+  .print-maintenance-plan h3 > span {display:block}
+  .print-maintenance-plan h3 small {font-size:6.8pt}
+  .print-maintenance-plan th,.print-maintenance-plan td,.print-maintenance-details.has-five-plans .print-maintenance-plan th,.print-maintenance-details.has-five-plans .print-maintenance-plan td {font-size:7.2pt;line-height:1.15;padding:0.4mm 0.7mm;overflow-wrap:anywhere}
+  .print-maintenance-plan tr.is-total th,.print-maintenance-plan tr.is-total td {font-size:7.5pt;background:var(--print-accent-soft)}
+  .print-check-costs {display:flex;flex-direction:column;align-items:flex-end;gap:0.2mm;white-space:normal}
+  .print-check-costs > span {gap:0.4mm}
+  .print-check-costs small {font-size:6.5pt}
+  .print-omatome-note {font-size:6.8pt;margin-top:0.8mm;line-height:1.15}
+  .print-maintenance-cadence {margin-top:2mm;padding-top:1mm}
+  .print-maintenance-cadence h3 {font-size:9pt;margin-bottom:1mm}
+  .print-maintenance-cadence th,.print-maintenance-cadence td {font-size:7pt;padding:0.5mm 1mm;line-height:1.15}
+  .print-maintenance-cadence thead th small {font-size:6.5pt}
+  .print-disclaimer {font-size:6.8pt;margin-top:1.5mm;line-height:1.2}
+  .pricing-snapshot {font-size:6.5pt;line-height:1.2;margin:0.8mm 0}
+}

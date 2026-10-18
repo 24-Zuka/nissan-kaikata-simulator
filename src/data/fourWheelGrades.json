@@ -1,0 +1,982 @@
+[
+  {
+    "id": "dayz-5215b9945b",
+    "model": "デイズ",
+    "grade": "ハイウェイスターGターボ プロパイロットエディション",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/dayz_gradedata.xml",
+    "sourceGroup": "gradelist"
+  },
+  {
+    "id": "dayz-c38180fccc",
+    "model": "デイズ",
+    "grade": "ハイウェイスターX プロパイロットエディション",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/dayz_gradedata.xml",
+    "sourceGroup": "gradelist"
+  },
+  {
+    "id": "dayz-0027694eaa",
+    "model": "デイズ",
+    "grade": "ハイウェイスターGターボ",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/dayz_gradedata.xml",
+    "sourceGroup": "gradelist"
+  },
+  {
+    "id": "dayz-0d0408bc96",
+    "model": "デイズ",
+    "grade": "ハイウェイスターX",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/dayz_gradedata.xml",
+    "sourceGroup": "gradelist"
+  },
+  {
+    "id": "dayz-f705c4d10e",
+    "model": "デイズ",
+    "grade": "ハイウェイスターGターボ アーバンクロム プロパイロットエディション",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/dayz_gradedata.xml",
+    "sourceGroup": "gradelist"
+  },
+  {
+    "id": "dayz-f22752b810",
+    "model": "デイズ",
+    "grade": "ハイウェイスターX アーバンクロム プロパイロットエディション",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/dayz_gradedata.xml",
+    "sourceGroup": "gradelist"
+  },
+  {
+    "id": "dayz-99cb813a9f",
+    "model": "デイズ",
+    "grade": "ハイウェイスターGターボ アーバンクロム",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/dayz_gradedata.xml",
+    "sourceGroup": "gradelist"
+  },
+  {
+    "id": "dayz-74a66c716d",
+    "model": "デイズ",
+    "grade": "ハイウェイスターX アーバンクロム",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/dayz_gradedata.xml",
+    "sourceGroup": "gradelist"
+  },
+  {
+    "id": "dayz-4b68ab3847",
+    "model": "デイズ",
+    "grade": "X",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/dayz_gradedata.xml",
+    "sourceGroup": "gradelist"
+  },
+  {
+    "id": "dayz-18bfd79413",
+    "model": "デイズ",
+    "grade": "ボレロ",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/dayz_gradedata.xml",
+    "sourceGroup": "gradelist"
+  },
+  {
+    "id": "roox-8de0b3c47f",
+    "model": "ルークス",
+    "grade": "S",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/roox_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "roox-4b68ab3847",
+    "model": "ルークス",
+    "grade": "X",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/roox_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "roox-0d0408bc96",
+    "model": "ルークス",
+    "grade": "ハイウェイスターX",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/roox_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "roox-c38180fccc",
+    "model": "ルークス",
+    "grade": "ハイウェイスターX プロパイロットエディション",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/roox_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "roox-0027694eaa",
+    "model": "ルークス",
+    "grade": "ハイウェイスターGターボ",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/roox_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "roox-5215b9945b",
+    "model": "ルークス",
+    "grade": "ハイウェイスターGターボ プロパイロットエディション",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/roox_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "roox-9d7eb0c632",
+    "model": "ルークス",
+    "grade": "AUTECH LINE",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/roox_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "roox-1972bb647e",
+    "model": "ルークス",
+    "grade": "AUTECH LINE プロパイロットエディション",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/roox_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "roox-f78e97a88e",
+    "model": "ルークス",
+    "grade": "AUTECH LINE ターボ",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/roox_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "roox-365141f370",
+    "model": "ルークス",
+    "grade": "AUTECH LINE ターボ プロパイロットエディション",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/roox_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "clipperrio-a9f51566bd",
+    "model": "クリッパーリオ",
+    "grade": "E",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/clipperrio_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "clipperrio-333e0a1e27",
+    "model": "クリッパーリオ",
+    "grade": "G",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/clipperrio_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "note-9031ac3163",
+    "model": "ノート",
+    "grade": "X FOUR",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/note_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "note-b494188b6a",
+    "model": "ノート",
+    "grade": "X FOUR Black Edition",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/note_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "note-a9a646fede",
+    "model": "ノート",
+    "grade": "AUTECH LINE FOUR",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/note_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "note-1fe60744e3",
+    "model": "ノート",
+    "grade": "AUTECH CROSSOVER FOUR",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/note_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "aura-21bca640bc",
+    "model": "ノート オーラ",
+    "grade": "G FOUR",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/aura_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "aura-6c7d20a630",
+    "model": "ノート オーラ",
+    "grade": "G FOUR Black Edition",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/aura_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "aura-78196d6284",
+    "model": "ノート オーラ",
+    "grade": "G FOUR leather edition",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/aura_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "aura-25613b71a8",
+    "model": "ノート オーラ",
+    "grade": "G FOUR leather Black Edition",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/aura_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "aura-b32e55b2e6",
+    "model": "ノート オーラ",
+    "grade": "NISMO tuned e-POWER 4WD",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/aura_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "aura-cd123a6bf6",
+    "model": "ノート オーラ",
+    "grade": "NISMO tuned e-POWER 4WD Black Limited",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/aura_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "aura-b1e5575e48",
+    "model": "ノート オーラ",
+    "grade": "AUTECH FOUR",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/aura_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-4b68ab3847",
+    "model": "セレナ",
+    "grade": "X",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-e62a9a5661",
+    "model": "セレナ",
+    "grade": "X（XVパッケージ）",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-c91aa8976e",
+    "model": "セレナ",
+    "grade": "X（XVパッケージ）（防水シート車）",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-2c502371f6",
+    "model": "セレナ",
+    "grade": "ハイウェイスターV",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-7507ce20af",
+    "model": "セレナ",
+    "grade": "ハイウェイスターV（防水シート車）",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-90cd7d3ccc",
+    "model": "セレナ",
+    "grade": "e-4ORCE X",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-af54fdf106",
+    "model": "セレナ",
+    "grade": "e-4ORCE X（XVパッケージ）",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-2d4bac509b",
+    "model": "セレナ",
+    "grade": "e-4ORCE X（XVパッケージ）（防水シート車）",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-5eac0b5456",
+    "model": "セレナ",
+    "grade": "e-4ORCE ハイウェイスターV",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-5565696927",
+    "model": "セレナ",
+    "grade": "e-4ORCE ハイウェイスターV（防水シート車）",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-9d7eb0c632",
+    "model": "セレナ",
+    "grade": "AUTECH LINE",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-10dd794ef7",
+    "model": "セレナ",
+    "grade": "e-4ORCE AUTECH LINE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-758a478bbe",
+    "model": "セレナ",
+    "grade": "AUTECH",
+    "drive": "4WD",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-cecae6cc34",
+    "model": "セレナ",
+    "grade": "e-4ORCE AUTECH",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/serena_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "elgrand-db8518f0f4",
+    "model": "エルグランド",
+    "grade": "X e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/elgrand_gradedata.xml",
+    "sourceGroup": "gradelist1"
+  },
+  {
+    "id": "elgrand-754c4142a2",
+    "model": "エルグランド",
+    "grade": "G e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/elgrand_gradedata.xml",
+    "sourceGroup": "gradelist1"
+  },
+  {
+    "id": "elgrand-aec76848d9",
+    "model": "エルグランド",
+    "grade": "VIP e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/elgrand_gradedata.xml",
+    "sourceGroup": "gradelist1"
+  },
+  {
+    "id": "elgrand-9f4ee50080",
+    "model": "エルグランド",
+    "grade": "AUTECH e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/elgrand_gradedata.xml",
+    "sourceGroup": "gradelist1"
+  },
+  {
+    "id": "elgrand-7f4040aa2c",
+    "model": "エルグランド",
+    "grade": "AUTECH LINE e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/elgrand_gradedata.xml",
+    "sourceGroup": "gradelist1"
+  },
+  {
+    "id": "elgrand-06429d5b7f",
+    "model": "エルグランド",
+    "grade": "AUTECH LINE e-4ORCE \"G-spec\"",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/elgrand_gradedata.xml",
+    "sourceGroup": "gradelist1"
+  },
+  {
+    "id": "kicks-754c4142a2",
+    "model": "キックス",
+    "grade": "G e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/kicks_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "kicks-697fcdaa9b",
+    "model": "キックス",
+    "grade": "X+ e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/kicks_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "kicks-db8518f0f4",
+    "model": "キックス",
+    "grade": "X e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/kicks_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "kicks-a7883119e7",
+    "model": "キックス",
+    "grade": "ROCK CREEK e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "発売前・2026-12-23発売予定（受注状況は別確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/kicks_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "kicks-6e4f06902e",
+    "model": "キックス",
+    "grade": "ROCK CREEK e-4ORCE Utility Spec",
+    "drive": "e-4ORCE",
+    "status": "発売前・2026-12-23発売予定（受注状況は別確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/kicks_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "x-trail-754c4142a2",
+    "model": "エクストレイル",
+    "grade": "G e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/x-trail_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "x-trail-2e58539884",
+    "model": "エクストレイル",
+    "grade": "X e-4ORCE [2列]",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/x-trail_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "x-trail-a730978815",
+    "model": "エクストレイル",
+    "grade": "ROCK CREEK e-4ORCE [2列]",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/x-trail_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "x-trail-c2689a5500",
+    "model": "エクストレイル",
+    "grade": "NISMO Advanced Package e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/x-trail_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "x-trail-9a052449e1",
+    "model": "エクストレイル",
+    "grade": "NISMO e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/x-trail_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "x-trail-37dc5e853e",
+    "model": "エクストレイル",
+    "grade": "AUTECH SPORTS SPEC e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/x-trail_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "x-trail-f64d3dcc97",
+    "model": "エクストレイル",
+    "grade": "AUTECH Advanced Package e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/x-trail_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "x-trail-1ce8ee5eed",
+    "model": "エクストレイル",
+    "grade": "AUTECH e-4ORCE [2列]",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/x-trail_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "x-trail-6bebfd7696",
+    "model": "エクストレイル",
+    "grade": "X e-4ORCE [3列]",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/x-trail_gradedata.xml",
+    "sourceGroup": "gradelist3"
+  },
+  {
+    "id": "x-trail-f9e6ca26c9",
+    "model": "エクストレイル",
+    "grade": "ROCK CREEK e-4ORCE [3列]",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/x-trail_gradedata.xml",
+    "sourceGroup": "gradelist3"
+  },
+  {
+    "id": "x-trail-c82ea4d874",
+    "model": "エクストレイル",
+    "grade": "AUTECH e-4ORCE [3列]",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/x-trail_gradedata.xml",
+    "sourceGroup": "gradelist3"
+  },
+  {
+    "id": "ariya-fbdd6185b6",
+    "model": "日産アリア",
+    "grade": "B6 e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/ariya_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "ariya-219951a8e9",
+    "model": "日産アリア",
+    "grade": "B9 e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/ariya_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "ariya-a056341215",
+    "model": "日産アリア",
+    "grade": "NISMO B6 e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/ariya_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "ariya-1a47b2a36f",
+    "model": "日産アリア",
+    "grade": "NISMO B9 e-4ORCE",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・受注状況は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/ariya_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "murano-sv",
+    "model": "ムラーノ",
+    "grade": "SV",
+    "drive": "4WD",
+    "status": "公式受注開始発表あり・現在の納期は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://global.nissannews.com/ja-JP/releases/260603-01-j",
+    "sourceGroup": "国内導入仕様"
+  },
+  {
+    "id": "kicks-x-e4orce-simple",
+    "model": "キックス",
+    "grade": "X e-4ORCE シンプルパッケージ",
+    "drive": "e-4ORCE",
+    "status": "公式掲載・仕様と購入条件は販売店確認",
+    "checkedAt": "2026-10-17",
+    "source": "https://www2.nissan.co.jp/SP/GRADE/XML/kicks_gradedata.xml",
+    "sourceGroup": "gradelist2"
+  },
+  {
+    "id": "serena-lv-a35c008184",
+    "model": "セレナ",
+    "grade": "X 送迎タイプ",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/PICKUP/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-e45fa5fcbc",
+    "model": "セレナ",
+    "grade": "X XVパッケージ 送迎タイプ",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/PICKUP/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-9910dbf783",
+    "model": "セレナ",
+    "grade": "X チェアキャブ リフタータイプ",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/LIFTER/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-28bd959bbe",
+    "model": "セレナ",
+    "grade": "X XVパッケージ チェアキャブ リフタータイプ",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/LIFTER/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-6616353774",
+    "model": "セレナ",
+    "grade": "X 助手席スライドアップシート",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/SIDESEAT/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-4aec114043",
+    "model": "セレナ",
+    "grade": "X XVパッケージ 助手席スライドアップシート",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/SIDESEAT/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-d4f3e66a5b",
+    "model": "セレナ",
+    "grade": "ハイウェイスターV 助手席スライドアップシート",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/SIDESEAT/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-11ae3b7236",
+    "model": "セレナ",
+    "grade": "X XVパッケージ ステップタイプ",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/STEP/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-fef2934923",
+    "model": "セレナ",
+    "grade": "ハイウェイスターV ステップタイプ",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/STEP/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-7df5468662",
+    "model": "セレナ",
+    "grade": "e-4ORCE X XVパッケージ ステップタイプ",
+    "drive": "e-4ORCE",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/STEP/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-16826cd234",
+    "model": "セレナ",
+    "grade": "e-4ORCE ハイウェイスターV ステップタイプ",
+    "drive": "e-4ORCE",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/STEP/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-6944be9807",
+    "model": "セレナ",
+    "grade": "X 乗降サポートパック付車",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/SUPPORTPACK/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "roox-lv-6616353774",
+    "model": "ルークス",
+    "grade": "X 助手席スライドアップシート",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/ROOX/SIDESEAT/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "roox-lv-97d0f20259",
+    "model": "ルークス",
+    "grade": "ハイウェイスターX 助手席スライドアップシート",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/ROOX/SIDESEAT/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "roox-lv-a5ed46cba0",
+    "model": "ルークス",
+    "grade": "ハイウェイスターX プロパイロットエディション 助手席スライドアップシート",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/ROOX/SIDESEAT/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-b12ec82f4f",
+    "model": "セレナ",
+    "grade": "X XVパッケージ セカンドスライドアップシート",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/SECONDSE/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-240f6867dd",
+    "model": "セレナ",
+    "grade": "ハイウェイスターV セカンドスライドアップシート",
+    "drive": "4WD",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/SECONDSE/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-aadd36f4af",
+    "model": "セレナ",
+    "grade": "e-4ORCE X XVパッケージ セカンドスライドアップシート",
+    "drive": "e-4ORCE",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/SECONDSE/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "serena-lv-b4ab4b63c1",
+    "model": "セレナ",
+    "grade": "e-4ORCE ハイウェイスターV セカンドスライドアップシート",
+    "drive": "e-4ORCE",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/SERENA/SECONDSE/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "elgrand-lv-2051e2da6d",
+    "model": "エルグランド",
+    "grade": "X e-4ORCE ステップタイプ",
+    "drive": "e-4ORCE",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/ELGRAND/STEP/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "elgrand-lv-d4be9336ed",
+    "model": "エルグランド",
+    "grade": "G e-4ORCE ステップタイプ",
+    "drive": "e-4ORCE",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/ELGRAND/STEP/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "elgrand-lv-f68c6a00d3",
+    "model": "エルグランド",
+    "grade": "AUTECH LINE e-4ORCE ステップタイプ",
+    "drive": "e-4ORCE",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/ELGRAND/STEP/price.html",
+    "sourceGroup": "LV4WD"
+  },
+  {
+    "id": "elgrand-lv-ea6fcda4d1",
+    "model": "エルグランド",
+    "grade": "AUTECH LINE e-4ORCE \"G-spec\" ステップタイプ",
+    "drive": "e-4ORCE",
+    "status": "福祉仕様・公式掲載（適用・受注は販売店確認）",
+    "checkedAt": "2026-10-17",
+    "source": "https://lv.nissan.co.jp/LVCAR/ELGRAND/STEP/price.html",
+    "sourceGroup": "LV4WD"
+  }
+]
