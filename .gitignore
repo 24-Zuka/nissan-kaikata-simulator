@@ -26,3 +26,6 @@ tmp/
 *.tsbuildinfo
 .env*
 !.env.example
+
+dist-embed/
+dist-pitnote/

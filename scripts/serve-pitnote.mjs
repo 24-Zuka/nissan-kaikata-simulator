@@ -1,6 +1,6 @@
 // Local test server. Applies the distribution's _headers and Pages-style HTML redirects.
 import http from 'node:http';import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
-const root=fileURLToPath(new URL('../../pitnote/',import.meta.url));
+const root=fileURLToPath(new URL('../dist-pitnote/',import.meta.url));
 const rules=[];for(const line of fs.readFileSync(path.join(root,'_headers'),'utf8').split('\n')){if(!line.trim()||line.startsWith('#'))continue;if(!/^\s/.test(line))rules.push({path:line,headers:[]});else rules.at(-1).headers.push(line.trim());}
 http.createServer((req,res)=>{const url=new URL(req.url,'http://localhost');let pathname=decodeURIComponent(url.pathname);if(pathname.endsWith('.html')){res.writeHead(302,{Location:pathname.slice(0,-5)});res.end();return;}
  const target=path.resolve(root,'.'+pathname);if(target!==path.resolve(root)&&!target.startsWith(root)){res.writeHead(403);res.end();return;}

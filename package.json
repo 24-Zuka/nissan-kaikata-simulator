@@ -8,10 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint src server api scripts e2e vite.config.ts vitest.config.ts playwright.config.ts",
     "test": "vitest run --config vitest.config.ts",
-    "test:e2e": "playwright test",
+    "test:e2e": "npm run build:pitnote && playwright test",
     "typecheck": "tsc -b --pretty false",
     "check:forbidden": "node scripts/check-forbidden.mjs",
-    "check:secrets": "node scripts/check-secrets.mjs"
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "build:pitnote": "vite build --config vite.embed.config.ts && node scripts/package-pitnote.mjs"
   },
   "dependencies": {
     "@clerk/backend": "^3.11.2",
